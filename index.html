@@ -39,7 +39,6 @@
     overscroll-behavior-y: none;
   }
 
-  /* ---------- Header ---------- */
   .topbar{
     position:sticky;top:0;z-index:50;
     display:flex;align-items:center;justify-content:space-between;
@@ -65,7 +64,6 @@
   }
   .brand .sub{font-size:11.5px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
-  /* ---------- Buttons ---------- */
   .btn{
     font:inherit;font-size:14px;font-weight:600;
     border-radius:10px;border:1px solid transparent;
@@ -96,7 +94,6 @@
   .icon-btn:hover{color:var(--text);background:rgba(255,255,255,.06);}
   #settingsBtn{padding: 9px 14px; font-size: 13.5px;}
 
-  /* ---------- Layout ---------- */
   main{
     max-width:880px;margin:0 auto;
     padding: 24px calc(18px + var(--safe-right)) calc(60px + var(--safe-bottom)) calc(18px + var(--safe-left));
@@ -112,7 +109,6 @@
   .card h2{font-size:16px;margin:0 0 18px;font-weight:650;letter-spacing:.2px;}
   .hidden{display:none !important;}
 
-  /* ---------- Setup ---------- */
   .field{margin-bottom:22px;}
   .field > label{display:block;font-size:13px;color:var(--muted);margin-bottom:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;}
   .mode-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;}
@@ -164,7 +160,6 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* ---------- Training ---------- */
   .train-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:14px;}
   .status{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--muted);font-weight:550;line-height:1.3;}
   .status.playing{color:var(--text);}
@@ -222,7 +217,6 @@
   }
   .counter.complete{color:var(--green);}
 
-  /* ---------- Results ---------- */
   .stats{
     display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
     gap:12px;margin-bottom:24px;
@@ -270,7 +264,6 @@
   .char.c-bad{background:rgba(248,81,73,.14);color:var(--red);}
   .char.c-miss{background:rgba(255,255,255,.03);color:#4a5567;}
 
-  /* ---------- Modal ---------- */
   .modal-backdrop{
     position:fixed;inset:0;z-index:100;
     background:rgba(6,9,13,.72);
@@ -329,9 +322,6 @@
   select:focus{outline:none;border-color:var(--accent);}
   #testSound{width:100%;margin-top:6px;}
 
-  /* =========================================================
-     MOBILE ADAPTATION
-     ========================================================= */
   @media (max-width: 640px){
     .brand .sub{display:none;}
     .brand .logo{width:34px;height:34px;font-size:16px;border-radius:10px;}
@@ -369,7 +359,6 @@
     }
     .train-controls .btn span.lbl{display:inline;}
 
-    /* Answer rows: line number + counter on top, inputs below */
     .answers{gap:0;}
     .answer-row{
       display: grid;
@@ -408,7 +397,7 @@
       gap: 5px;
     }
     .group-input{
-      font-size: 16px;              /* 16px → no iOS zoom */
+      font-size: 16px;
       padding: 12px 2px;
       text-align: center;
       letter-spacing: 0.5px;
@@ -474,7 +463,6 @@
     .stat .lbl{font-size:10px;}
   }
 
-  /* Landscape phones: keep controls compact */
   @media (max-height: 500px) and (orientation: landscape){
     .card{padding: 12px;}
     .answer-row{padding: 8px 0;}
@@ -499,7 +487,6 @@
 
 <main>
 
-  <!-- ============ SETUP ============ -->
   <section class="card" id="setupCard">
     <h2>Параметры тренировки</h2>
 
@@ -524,7 +511,6 @@
     <button id="startBtn" class="btn btn-primary btn-lg">▶ Начать тренировку</button>
   </section>
 
-  <!-- ============ TRAINING ============ -->
   <section class="card hidden" id="trainCard">
     <div class="train-head">
       <div class="status playing" id="status">
@@ -541,7 +527,6 @@
     <div class="answers" id="answers"></div>
   </section>
 
-  <!-- ============ RESULTS ============ -->
   <section class="card hidden" id="resultCard">
     <h2>Результат</h2>
     <div class="stats" id="stats"></div>
@@ -551,7 +536,6 @@
 
 </main>
 
-<!-- ============ SETTINGS MODAL ============ -->
 <div class="modal-backdrop hidden" id="modal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal-head">
@@ -637,9 +621,9 @@ const GROUPS_PER_LINE = 5;
 const CHARS_PER_GROUP = 5;
 
 /* =========================================================
-   Настройки
+   Настройки (persist)
    ========================================================= */
-const STORAGE_KEY = 'morse-trainer-settings-v1';
+const STORAGE_KEY = 'morse-trainer-settings-v2';
 const DEFAULTS = { freq: 700, wave: 'sine', volume: 70, wpm: 15 };
 
 function loadSettings(){
@@ -694,59 +678,124 @@ const setVol  = $('setVol'),  volVal  = $('volVal');
 const setWpm  = $('setWpm'),  wpmVal  = $('wpmVal');
 
 /* =========================================================
+   АУДИО-ДВИЖОК (mobile-friendly)
+   ---------------------------------------------------------
+   Ключевые улучшения против прерываний на смартфоне:
+   1. Один постоянный осциллятор вместо сотен короткоживущих —
+      меньше нагрузки на CPU и меньше работы для GC.
+   2. latencyHint: 'playback' — большой аудиобуфер, устойчив
+      к «голоданию» аудиопотока на мобильных.
+   3. Разблокировка AudioContext при первом жеста пользователя
+      (iOS Safari + Chrome Android), включая silent buffer trick.
+   4. resume() при возврате из фона (visibilitychange).
+   5. Громкость и параметры тона меняются без пересоздания узлов.
+   ========================================================= */
+let audioCtx = null;        // единый контекст
+let masterGain = null;      // общая громкость
+let toneEnvGain = null;     // гейт (envelope) 0..1
+let toneOsc = null;         // единственный осциллятор
+let audioReady = false;     // флаг «контекст создан и разблокирован»
+
+function initAudio(){
+  if(audioCtx) return;
+  try{
+    const AC = window.AudioContext || window.webkitAudioContext;
+    // Большой буфер — главный фикс против прерываний на мобильных
+    const opts = { latencyHint: 'playback' };
+    audioCtx = new AC(opts);
+
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = settings.volume / 100;
+    masterGain.connect(audioCtx.destination);
+
+    toneEnvGain = audioCtx.createGain();
+    toneEnvGain.gain.value = 0;
+    toneEnvGain.connect(masterGain);
+
+    toneOsc = audioCtx.createOscillator();
+    toneOsc.type = settings.wave;
+    toneOsc.frequency.value = settings.freq;
+    toneOsc.connect(toneEnvGain);
+    toneOsc.start();
+  }catch(e){
+    console.error('Не удалось инициализировать Web Audio:', e);
+    audioCtx = null;
+  }
+}
+
+// Разблокировка (iOS + Android) — вызывается на любой user gesture
+function unlockAudio(){
+  initAudio();
+  if(!audioCtx) return;
+
+  const doResume = () => {
+    if(audioCtx.state === 'suspended'){
+      audioCtx.resume().then(() => {
+        // iOS: воспроизводим пустой буфер, чтобы «разбудить» аудиовыход
+        if(!audioReady){
+          try{
+            const buf = audioCtx.createBuffer(1, 1, 22050);
+            const src = audioCtx.createBufferSource();
+            src.buffer = buf;
+            src.connect(audioCtx.destination);
+            src.start(0);
+            audioReady = true;
+          }catch(e){}
+        }
+      }).catch(()=>{});
+    } else {
+      audioReady = true;
+    }
+  };
+
+  doResume();
+}
+
+// Планирование сигнала: НЕ создаёт новых узлов — только автоматизация gain
+function scheduleBeep(startTime, duration){
+  if(!toneEnvGain || !audioCtx) return;
+  if(duration <= 0.0005) return;
+
+  const ramp = Math.min(0.005, duration * 0.3);
+  const t0 = Math.max(audioCtx.currentTime, startTime);
+  const t1 = t0 + ramp;
+  const t2 = t0 + duration - ramp;
+  const t3 = t0 + duration;
+
+  try{
+    toneEnvGain.gain.setValueAtTime(0, t0);
+    toneEnvGain.gain.linearRampToValueAtTime(1, t1);
+    toneEnvGain.gain.setValueAtTime(1, Math.max(t1, t2));
+    toneEnvGain.gain.linearRampToValueAtTime(0, t3);
+  }catch(e){}
+}
+
+// Немедленно заглушить тон и снять всю запланированную автоматизацию
+function stopAllAudio(){
+  if(toneEnvGain && audioCtx){
+    const now = audioCtx.currentTime;
+    try{
+      toneEnvGain.gain.cancelScheduledValues(now);
+      toneEnvGain.gain.setValueAtTime(0, now);
+    }catch(e){}
+  }
+  scheduledTimeouts.forEach(clearTimeout);
+  scheduledTimeouts = [];
+  if(rafId){ cancelAnimationFrame(rafId); rafId = null; }
+}
+
+/* =========================================================
    Состояние
    ========================================================= */
 let currentMode = 'ru';
 let task = [];
 let isPlaying = false;
 let isPaused = false;
-let scheduledNodes = [];
 let scheduledTimeouts = [];
-let audioCtx = null;
-let masterGain = null;
 let schedule = null;
 let t0 = 0;
 let pausedAt = 0;
 let rafId = null;
-
-/* =========================================================
-   Аудио
-   ========================================================= */
-function getCtx(){
-  if(!audioCtx){
-    const AC = window.AudioContext || window.webkitAudioContext;
-    audioCtx = new AC();
-  }
-  return audioCtx;
-}
-
-function scheduleBeep(ctx, dest, startTime, duration, freq, wave){
-  if(duration <= 0.0005) return;
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-  osc.type = wave;
-  osc.frequency.value = freq;
-  osc.connect(gain);
-  gain.connect(dest);
-
-  const ramp = Math.min(0.004, duration * 0.3);
-  gain.gain.setValueAtTime(0.0001, startTime);
-  gain.gain.exponentialRampToValueAtTime(1, startTime + ramp);
-  gain.gain.setValueAtTime(1, startTime + duration - ramp);
-  gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
-
-  osc.start(startTime);
-  osc.stop(startTime + duration + 0.02);
-  scheduledNodes.push(osc);
-}
-
-function stopAllAudio(){
-  scheduledNodes.forEach(n => { try{ n.stop(); }catch(e){} });
-  scheduledNodes = [];
-  scheduledTimeouts.forEach(clearTimeout);
-  scheduledTimeouts = [];
-  if(rafId){ cancelAnimationFrame(rafId); rafId = null; }
-}
 
 /* =========================================================
    Генерация задания
@@ -811,8 +860,14 @@ function buildSchedule(lines, dot){
    Запуск тренировки
    ========================================================= */
 async function startTraining(){
-  const ctx = getCtx();
-  if(ctx.state === 'suspended'){ try{ await ctx.resume(); }catch(e){} }
+  // Разблокируем аудио (жест пользователя — клик по кнопке)
+  unlockAudio();
+
+  // Дадим контексту «проснуться» — на iOS resume() асинхронный
+  if(audioCtx && audioCtx.state === 'suspended'){
+    try{ await audioCtx.resume(); }catch(e){}
+  }
+
   stopAllAudio();
 
   const lineCount = parseInt(linesRange.value, 10);
@@ -835,18 +890,23 @@ async function startTraining(){
   const { events, total, lineStarts } = buildSchedule(task, dot);
   schedule = { events, total, lineStarts };
 
-  if(masterGain){ try{ masterGain.disconnect(); }catch(e){} }
-  masterGain = ctx.createGain();
-  masterGain.gain.value = settings.volume / 100;
-  masterGain.connect(ctx.destination);
+  // Обновим параметры единственного осциллятора
+  if(toneOsc && audioCtx){
+    toneOsc.type = settings.wave;
+    toneOsc.frequency.setValueAtTime(settings.freq, audioCtx.currentTime);
+  }
+  if(masterGain){
+    masterGain.gain.value = settings.volume / 100;
+  }
 
-  t0 = ctx.currentTime + 0.35;
+  // Небольшая задержка перед стартом — даём аудиопотоку стабилизироваться
+  t0 = audioCtx.currentTime + 0.5;
   pausedAt = 0;
   isPlaying = true;
   isPaused = false;
 
   events.forEach(ev => {
-    scheduleBeep(ctx, masterGain, t0 + ev.start, ev.dur, settings.freq, settings.wave);
+    scheduleBeep(t0 + ev.start, ev.dur);
   });
 
   scheduleLineIndicators(lineCount);
@@ -856,10 +916,9 @@ async function startTraining(){
 }
 
 function scheduleLineIndicators(lineCount){
-  const ctx = getCtx();
   schedule.lineStarts.forEach((ls, i) => {
     if(ls <= pausedAt) return;
-    const delayMs = (t0 + ls - ctx.currentTime) * 1000;
+    const delayMs = (t0 + ls - audioCtx.currentTime) * 1000;
     if(delayMs < 0) return;
     scheduledTimeouts.push(setTimeout(() => {
       if(!isPaused && isPlaying){
@@ -870,13 +929,12 @@ function scheduleLineIndicators(lineCount){
 }
 
 function scheduleCompletion(){
-  const ctx = getCtx();
   const endTime = t0 + schedule.total;
-  const delayMs = (endTime - ctx.currentTime) * 1000;
+  const delayMs = (endTime - audioCtx.currentTime) * 1000;
   scheduledTimeouts.push(setTimeout(() => {
     if(isPaused || !isPlaying) return;
     finishPlayback();
-  }, Math.max(0, delayMs) + 250));
+  }, Math.max(0, delayMs) + 300));
 }
 
 function finishPlayback(){
@@ -893,8 +951,7 @@ function finishPlayback(){
 
 function tickProgress(){
   if(!isPlaying || isPaused){ rafId = null; return; }
-  const ctx = getCtx();
-  const elapsed = ctx.currentTime - t0;
+  const elapsed = audioCtx.currentTime - t0;
   const p = Math.min(1, elapsed / schedule.total);
   progressBar.style.width = (p * 100) + '%';
   if(p < 1) rafId = requestAnimationFrame(tickProgress);
@@ -904,14 +961,9 @@ function tickProgress(){
 /* ---------- Пауза / Продолжить ---------- */
 function pauseTraining(){
   if(!isPlaying || isPaused) return;
-  const ctx = getCtx();
-  pausedAt = ctx.currentTime - t0;
+  pausedAt = audioCtx.currentTime - t0;
 
-  scheduledNodes.forEach(n => { try{ n.stop(); }catch(e){} });
-  scheduledNodes = [];
-  scheduledTimeouts.forEach(clearTimeout);
-  scheduledTimeouts = [];
-  if(rafId){ cancelAnimationFrame(rafId); rafId = null; }
+  stopAllAudio();
 
   const p = Math.min(1, pausedAt / schedule.total);
   progressBar.style.width = (p * 100) + '%';
@@ -925,22 +977,28 @@ function pauseTraining(){
 
 function resumeTraining(){
   if(!isPlaying || !isPaused) return;
-  const ctx = getCtx();
-  if(ctx.state === 'suspended'){ try{ ctx.resume(); }catch(e){} }
+  if(audioCtx.state === 'suspended'){
+    audioCtx.resume().catch(()=>{});
+  }
 
   const elapsed = pausedAt;
-  const newT0 = ctx.currentTime + 0.12;
+  const newT0 = audioCtx.currentTime + 0.2;
   t0 = newT0 - elapsed;
 
   if(masterGain) masterGain.gain.value = settings.volume / 100;
+  if(toneOsc){
+    toneOsc.type = settings.wave;
+    toneOsc.frequency.setValueAtTime(settings.freq, audioCtx.currentTime);
+  }
 
+  // Перепланируем только «будущие» сигналы
   schedule.events.forEach(ev => {
     const evEnd = ev.start + ev.dur;
     if(evEnd <= elapsed) return;
     const startOffset = Math.max(0, ev.start - elapsed);
     const clipStart = Math.max(0, elapsed - ev.start);
     const dur = ev.dur - clipStart;
-    scheduleBeep(ctx, masterGain, newT0 + startOffset, dur, settings.freq, settings.wave);
+    scheduleBeep(newT0 + startOffset, dur);
   });
 
   scheduleLineIndicators(task.length);
@@ -960,7 +1018,6 @@ function cancelTraining(){
   isPlaying = false;
   isPaused = false;
   pausedAt = 0;
-  if(masterGain){ try{ masterGain.disconnect(); }catch(e){} masterGain = null; }
   trainCard.classList.add('hidden');
   setupCard.classList.remove('hidden');
   answersEl.innerHTML = '';
@@ -969,7 +1026,7 @@ function cancelTraining(){
 }
 
 /* =========================================================
-   Поля ввода ответа (группы по 5)
+   Поля ввода ответа
    ========================================================= */
 function renderAnswerInputs(lines){
   answersEl.innerHTML = '';
@@ -995,7 +1052,7 @@ function renderAnswerInputs(lines){
       input.spellcheck = false;
       input.maxLength = CHARS_PER_GROUP;
       input.inputMode = 'text';
-      input.enterKeyHint = g === GROUPS_PER_LINE - 1 ? 'next' : 'next';
+      input.enterKeyHint = 'next';
       input.dataset.line = i;
       input.dataset.group = g;
       input.setAttribute('aria-label', `Строка ${i + 1}, группа ${g + 1}`);
@@ -1004,7 +1061,6 @@ function renderAnswerInputs(lines){
       input.addEventListener('keydown', handleGroupKeydown);
       input.addEventListener('paste', handleGroupPaste);
       input.addEventListener('focus', () => {
-        // Небольшой скролл, чтобы поле не оказалось под клавиатурой
         setTimeout(() => {
           input.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
         }, 120);
@@ -1053,7 +1109,7 @@ function handleGroupInput(e){
   let v = filterToPool(input.value);
   if(v.length > CHARS_PER_GROUP) v = v.slice(0, CHARS_PER_GROUP);
   if(v !== input.value){
-    const pos = Math.min(v.length, v.length);
+    const pos = v.length;
     input.value = v;
     try{ input.setSelectionRange(pos, pos); }catch(err){}
   }
@@ -1296,29 +1352,54 @@ function applySettingsFromUI(){
   volVal.textContent  = settings.volume + ' %';
   wpmVal.textContent  = settings.wpm + ' WPM';
 
-  if(masterGain) masterGain.gain.value = settings.volume / 100;
+  // Живое обновление работающего движка (без пересоздания узлов)
+  if(audioCtx && toneOsc && masterGain){
+    toneOsc.type = settings.wave;
+    try{
+      toneOsc.frequency.setValueAtTime(settings.freq, audioCtx.currentTime);
+    }catch(e){}
+    masterGain.gain.value = settings.volume / 100;
+  }
 
   persistSettings();
 }
 
+// Тестовый сигнал использует свою временную цепочку,
+// чтобы не конфликтовать с тренировкой (если она идёт).
 function playTestTone(){
-  const ctx = getCtx();
-  if(ctx.state === 'suspended'){ ctx.resume(); }
+  unlockAudio();
+  if(!audioCtx) return;
+  if(audioCtx.state === 'suspended') audioCtx.resume().catch(()=>{});
+
+  const testMaster = audioCtx.createGain();
+  testMaster.gain.value = settings.volume / 100;
+  testMaster.connect(audioCtx.destination);
+
+  const testOsc = audioCtx.createOscillator();
+  const testEnv = audioCtx.createGain();
+  testOsc.type = settings.wave;
+  testOsc.frequency.value = settings.freq;
+  testEnv.gain.value = 0;
+  testOsc.connect(testEnv);
+  testEnv.connect(testMaster);
+  testOsc.start();
 
   const dot = 1.2 / settings.wpm;
-  const g = ctx.createGain();
-  g.gain.value = settings.volume / 100;
-  g.connect(ctx.destination);
-
   const code = '...-';
-  let t = ctx.currentTime + 0.05;
+  let t = audioCtx.currentTime + 0.08;
 
   [...code].forEach((el, i) => {
     if(i > 0) t += dot;
     const dur = el === '.' ? dot : dot * 3;
-    scheduleBeep(ctx, g, t, dur, settings.freq, settings.wave);
+    const ramp = Math.min(0.005, dur * 0.3);
+    testEnv.gain.setValueAtTime(0, t);
+    testEnv.gain.linearRampToValueAtTime(1, t + ramp);
+    testEnv.gain.setValueAtTime(1, t + dur - ramp);
+    testEnv.gain.linearRampToValueAtTime(0, t + dur);
     t += dur;
   });
+
+  testOsc.stop(t + 0.1);
 }
 
 /* =========================================================
@@ -1358,7 +1439,6 @@ againBtn.addEventListener('click', () => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
-/* --- Модальное окно --- */
 settingsBtn.addEventListener('click', openModal);
 modalClose.addEventListener('click', closeModal);
 saveSettingsBtn.addEventListener('click', closeModal);
@@ -1371,6 +1451,11 @@ resetSettingsBtn.addEventListener('click', () => {
   settings = {...DEFAULTS};
   persistSettings();
   openModal();
+  if(audioCtx && toneOsc && masterGain){
+    toneOsc.type = settings.wave;
+    try{ toneOsc.frequency.setValueAtTime(settings.freq, audioCtx.currentTime); }catch(e){}
+    masterGain.gain.value = settings.volume / 100;
+  }
 });
 
 testSoundBtn.addEventListener('click', playTestTone);
@@ -1385,6 +1470,34 @@ document.addEventListener('touchend', (e) => {
   if(now - lastTouchEnd <= 350) e.preventDefault();
   lastTouchEnd = now;
 }, { passive: false });
+
+/* =========================================================
+   ГЛОБАЛЬНЫЕ ОБРАБОТЧИКИ ДЛЯ МОБИЛЬНОГО АУДИО
+   ---------------------------------------------------------
+   Разблокируем AudioContext на самое первое касание, чтобы
+   к моменту старта тренировки он уже был готов и не «заикался».
+   ========================================================= */
+['touchstart', 'touchend', 'mousedown', 'click', 'keydown'].forEach(evt => {
+  document.addEventListener(evt, () => {
+    unlockAudio();
+  }, { passive: true });
+});
+
+/* --- Возврат из фона: возобновляем контекст --- */
+document.addEventListener('visibilitychange', () => {
+  if(!document.hidden && audioCtx){
+    if(audioCtx.state === 'suspended'){
+      audioCtx.resume().catch(()=>{});
+    }
+  }
+});
+
+/* iOS: страница могла выгрузиться из памяти — на всякий случай */
+window.addEventListener('pageshow', () => {
+  if(audioCtx && audioCtx.state === 'suspended'){
+    audioCtx.resume().catch(()=>{});
+  }
+});
 
 /* =========================================================
    Инициализация
