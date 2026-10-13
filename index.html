@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0e1116">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Тренажёр азбуки Морзе</title>
+<style>
+  :root{
+    --bg:#0e1116;
+    --panel:#161b22;
+    --panel-2:#1b2230;
+    --border:#2a3242;
+    --text:#e6edf3;
+    --muted:#8b98a9;
+    --accent:#4f8cff;
+    --accent-2:#3b6fd4;
+    --green:#3fb950;
+    --red:#f85149;
+    --radius:14px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{margin:0;padding:0;}
+  html{ -webkit-text-size-adjust: 100%; }
+  body{
+    background:radial-gradient(1200px 600px at 50% -10%, #172033 0%, var(--bg) 60%);
+    background-attachment: fixed;
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    min-height:100vh;
+    min-height:100dvh;
+    -webkit-font-smoothing:antialiased;
+    overscroll-behavior-y: none;
+  }
+
+  /* ---------- Header ---------- */
+  .topbar{
+    position:sticky;top:0;z-index:50;
+    display:flex;align-items:center;justify-content:space-between;
+    gap:12px;
+    padding: calc(12px + var(--safe-top)) calc(18px + var(--safe-right)) 12px calc(18px + var(--safe-left));
+    background:rgba(14,17,22,.85);
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);
+  }
+  .brand{display:flex;align-items:center;gap:11px;min-width:0;}
+  .brand .logo{
+    width:38px;height:38px;border-radius:11px;flex:none;
+    display:grid;place-items:center;
+    background:linear-gradient(145deg,var(--accent),#7b5cff);
+    color:#fff;font-size:18px;font-weight:800;letter-spacing:-1px;
+    box-shadow:0 4px 16px rgba(79,140,255,.35);
+  }
+  .brand-text{min-width:0;}
+  .brand h1{
+    font-size:16px;margin:0;font-weight:650;letter-spacing:.2px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .brand .sub{font-size:11.5px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    font:inherit;font-size:14px;font-weight:600;
+    border-radius:10px;border:1px solid transparent;
+    padding:10px 16px;cursor:pointer;
+    transition:.16s ease;white-space:nowrap;
+    display:inline-flex;align-items:center;gap:8px;justify-content:center;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    min-height: 42px;
+  }
+  .btn:active:not(:disabled){ transform: scale(.97); }
+  .btn:disabled{opacity:.45;cursor:not-allowed;}
+  .btn-primary{background:linear-gradient(180deg,var(--accent),var(--accent-2));color:#fff;box-shadow:0 4px 14px rgba(79,140,255,.28);}
+  .btn-primary:hover:not(:disabled){filter:brightness(1.1);}
+  .btn-ghost{background:var(--panel-2);color:var(--text);border-color:var(--border);}
+  .btn-ghost:hover:not(:disabled){background:#232c3d;border-color:#38455c;}
+  .btn-danger{background:var(--panel-2);color:#ffb0ac;border-color:rgba(248,81,73,.35);}
+  .btn-danger:hover:not(:disabled){background:rgba(248,81,73,.12);border-color:var(--red);}
+  .btn-lg{padding:14px 26px;font-size:15px;width:100%;min-height:50px;}
+  .icon-btn{
+    background:transparent;border:none;color:var(--muted);
+    font-size:18px;cursor:pointer;padding:8px;border-radius:9px;line-height:1;
+    min-width: 40px;min-height: 40px;
+    display: inline-flex;align-items: center;justify-content: center;
+    touch-action: manipulation;
+  }
+  .icon-btn:hover{color:var(--text);background:rgba(255,255,255,.06);}
+  #settingsBtn{padding: 9px 14px; font-size: 13.5px;}
+
+  /* ---------- Layout ---------- */
+  main{
+    max-width:880px;margin:0 auto;
+    padding: 24px calc(18px + var(--safe-right)) calc(60px + var(--safe-bottom)) calc(18px + var(--safe-left));
+  }
+  .card{
+    background:linear-gradient(180deg,var(--panel),#141922);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:24px;
+    margin-bottom:20px;
+    box-shadow:0 10px 40px rgba(0,0,0,.28);
+  }
+  .card h2{font-size:16px;margin:0 0 18px;font-weight:650;letter-spacing:.2px;}
+  .hidden{display:none !important;}
+
+  /* ---------- Setup ---------- */
+  .field{margin-bottom:22px;}
+  .field > label{display:block;font-size:13px;color:var(--muted);margin-bottom:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;}
+  .mode-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;}
+  .mode-btn{
+    font:inherit;font-size:14px;font-weight:600;text-align:left;
+    padding:14px 16px;border-radius:11px;cursor:pointer;
+    background:var(--panel-2);color:var(--text);
+    border:1px solid var(--border);
+    transition:.16s ease;position:relative;
+    touch-action: manipulation;
+    min-height: 60px;
+  }
+  .mode-btn:active{transform: scale(.98);}
+  .mode-btn.active{
+    background:linear-gradient(180deg,rgba(79,140,255,.22),rgba(79,140,255,.08));
+    border-color:var(--accent);
+    box-shadow:0 0 0 1px rgba(79,140,255,.4), 0 6px 20px rgba(79,140,255,.18);
+  }
+  .mode-btn .mhint{display:block;font-size:11.5px;color:var(--muted);font-weight:500;margin-top:3px;}
+  .mode-btn.active .mhint{color:#a8c4ff;}
+
+  .range-row{display:flex;align-items:center;gap:16px;}
+  input[type=range]{
+    -webkit-appearance:none;appearance:none;
+    flex:1;height:6px;border-radius:99px;
+    background:#242e3f;outline:none;cursor:pointer;
+    touch-action: manipulation;
+    padding: 14px 0;
+    background-clip: content-box;
+    background-image: linear-gradient(#242e3f, #242e3f);
+    background-size: 100% 6px;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:22px;height:22px;border-radius:50%;
+    background:linear-gradient(180deg,#6ea1ff,var(--accent-2));
+    border:2px solid #0e1116;
+    box-shadow:0 2px 8px rgba(79,140,255,.5);cursor:pointer;
+  }
+  input[type=range]::-moz-range-thumb{
+    width:20px;height:20px;border-radius:50%;border:2px solid #0e1116;
+    background:var(--accent);cursor:pointer;
+  }
+  .range-val{
+    min-width:74px;text-align:center;font-weight:700;font-size:15px;
+    background:var(--panel-2);border:1px solid var(--border);
+    border-radius:9px;padding:7px 10px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- Training ---------- */
+  .train-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:14px;}
+  .status{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--muted);font-weight:550;line-height:1.3;}
+  .status.playing{color:var(--text);}
+  .pulse{
+    width:10px;height:10px;border-radius:50%;background:var(--accent);flex:none;
+    box-shadow:0 0 0 0 rgba(79,140,255,.6);
+  }
+  .status.playing .pulse{animation:pulse 1.1s infinite;}
+  .status.paused .pulse{background:#e3b341;box-shadow:none;animation:none;}
+  .status.done .pulse{background:var(--green);box-shadow:none;animation:none;}
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(79,140,255,.55);}
+    70%{box-shadow:0 0 0 12px rgba(79,140,255,0);}
+    100%{box-shadow:0 0 0 0 rgba(79,140,255,0);}
+  }
+  .train-controls{display:flex;gap:8px;flex-wrap:wrap;}
+  .progress{height:5px;background:#1e2635;border-radius:99px;overflow:hidden;margin-bottom:20px;}
+  .progress-bar{height:100%;width:0%;border-radius:99px;background:linear-gradient(90deg,var(--accent),#7b5cff);}
+
+  .answers{display:flex;flex-direction:column;gap:9px;}
+  .answer-row{display:flex;align-items:center;gap:12px;}
+  .line-num{
+    width:30px;flex:none;text-align:center;
+    font-size:12.5px;font-weight:700;color:var(--muted);
+    font-variant-numeric:tabular-nums;
+  }
+  .groups-wrap{
+    flex:1;min-width:0;
+    display:flex;gap:7px;
+  }
+  .group-input{
+    flex:1 1 0;min-width:0;width:100%;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:16px;letter-spacing:1.5px;font-weight:600;
+    padding:11px 10px;border-radius:10px;
+    background:#0f141c;color:var(--text);
+    border:1px solid var(--border);
+    text-transform:uppercase;
+    transition:border-color .15s ease, box-shadow .15s ease, background .15s ease;
+    caret-color:var(--accent);
+    text-align: center;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .group-input:focus{
+    outline:none;border-color:var(--accent);
+    box-shadow:0 0 0 3px rgba(79,140,255,.18);
+    background:#0d1520;
+  }
+  .group-input:disabled{opacity:.55;cursor:not-allowed;}
+  .group-input::placeholder{color:#5b6779;font-size:13px;letter-spacing:0;text-transform:none;font-weight:400;}
+  .counter{
+    width:58px;flex:none;text-align:right;font-size:12.5px;font-weight:700;
+    color:var(--muted);font-variant-numeric:tabular-nums;
+  }
+  .counter.complete{color:var(--green);}
+
+  /* ---------- Results ---------- */
+  .stats{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
+    gap:12px;margin-bottom:24px;
+  }
+  .stat{
+    background:var(--panel-2);border:1px solid var(--border);
+    border-radius:12px;padding:14px 16px;text-align:center;
+  }
+  .stat .val{font-size:24px;font-weight:750;letter-spacing:-.5px;}
+  .stat .lbl{font-size:11.5px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.6px;font-weight:600;}
+  .stat.good .val{color:var(--green);}
+  .stat.bad .val{color:var(--red);}
+
+  .result-line{
+    border-top:1px solid var(--border);
+    padding:14px 0;
+  }
+  .result-line:first-child{border-top:none;padding-top:0;}
+  .result-head{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:9px;font-size:13px;font-weight:650;color:var(--muted);
+  }
+  .badge{
+    font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;
+    background:var(--panel-2);border:1px solid var(--border);color:var(--text);
+  }
+  .badge.perfect{background:rgba(63,185,80,.14);border-color:rgba(63,185,80,.4);color:var(--green);}
+  .badge.zero{background:rgba(248,81,73,.12);border-color:rgba(248,81,73,.35);color:var(--red);}
+
+  .char-row{display:flex;align-items:flex-start;gap:12px;margin-bottom:6px;}
+  .char-label{
+    width:96px;flex:none;font-size:11.5px;color:var(--muted);
+    padding-top:5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;
+  }
+  .chars{display:flex;flex-wrap:wrap;gap:3px;}
+  .char{
+    width:1.6em;height:1.75em;
+    display:inline-flex;align-items:center;justify-content:center;
+    border-radius:5px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:15px;font-weight:700;
+    background:rgba(255,255,255,.045);color:var(--muted);
+  }
+  .char.c-ok{background:rgba(63,185,80,.16);color:var(--green);}
+  .char.c-bad{background:rgba(248,81,73,.14);color:var(--red);}
+  .char.c-miss{background:rgba(255,255,255,.03);color:#4a5567;}
+
+  /* ---------- Modal ---------- */
+  .modal-backdrop{
+    position:fixed;inset:0;z-index:100;
+    background:rgba(6,9,13,.72);
+    backdrop-filter:blur(4px);
+    -webkit-backdrop-filter:blur(4px);
+    display:flex;align-items:center;justify-content:center;
+    padding:20px;
+    animation:fadeIn .16s ease;
+    overscroll-behavior: contain;
+  }
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  .modal{
+    width:100%;max-width:460px;
+    background:linear-gradient(180deg,#1a2130,#141922);
+    border:1px solid var(--border);
+    border-radius:16px;
+    box-shadow:0 24px 70px rgba(0,0,0,.6);
+    animation:slideUp .2s cubic-bezier(.2,.8,.3,1);
+    max-height:90vh;
+    max-height:90dvh;
+    display:flex;flex-direction:column;
+  }
+  @keyframes slideUp{from{transform:translateY(14px) scale(.98);opacity:0}to{transform:none;opacity:1}}
+  .modal-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 20px;border-bottom:1px solid var(--border);
+    flex: none;
+  }
+  .modal-head h2{font-size:16px;margin:0;font-weight:650;}
+  .modal-body{padding:20px;overflow-y:auto; -webkit-overflow-scrolling: touch;}
+  .modal-foot{
+    display:flex;gap:10px;justify-content:flex-end;
+    padding:16px 20px;border-top:1px solid var(--border);
+    flex: none;
+  }
+  .modal-foot .btn{flex:0 0 auto;}
+  .modal-foot .btn-ghost{margin-right:auto;}
+
+  .setting{margin-bottom:20px;}
+  .setting:last-of-type{margin-bottom:8px;}
+  .setting-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;gap:10px;}
+  .setting-row label{font-size:13.5px;font-weight:600;}
+  .setting-val{font-size:13px;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums;white-space: nowrap;}
+  select{
+    width:100%;font:inherit;font-size:16px;
+    padding:12px 12px;border-radius:10px;
+    background:#0f141c;color:var(--text);
+    border:1px solid var(--border);cursor:pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' stroke='%238b98a9' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+  select:focus{outline:none;border-color:var(--accent);}
+  #testSound{width:100%;margin-top:6px;}
+
+  /* =========================================================
+     MOBILE ADAPTATION
+     ========================================================= */
+  @media (max-width: 640px){
+    .brand .sub{display:none;}
+    .brand .logo{width:34px;height:34px;font-size:16px;border-radius:10px;}
+    .brand h1{font-size:15px;}
+    #settingsBtn{padding: 9px 12px;font-size:13px;}
+
+    main{
+      padding: 14px calc(12px + var(--safe-right)) calc(48px + var(--safe-bottom)) calc(12px + var(--safe-left));
+    }
+    .card{padding:16px;border-radius:12px;margin-bottom:14px;}
+    .card h2{font-size:15px;margin-bottom:14px;}
+
+    .field{margin-bottom:18px;}
+    .field > label{font-size:11.5px;margin-bottom:9px;}
+
+    .mode-grid{grid-template-columns: 1fr 1fr; gap:8px;}
+    .mode-btn{padding:12px 12px;font-size:13px;min-height: 56px;}
+    .mode-btn .mhint{font-size:10.5px;margin-top:2px;}
+
+    .range-row{gap:12px;}
+    .range-val{min-width:62px;font-size:14px;padding:8px 8px;}
+
+    .train-head{flex-direction:column;align-items:stretch;gap:12px;}
+    .status{font-size:13px;}
+    .train-controls{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:8px;
+    }
+    .train-controls .btn{
+      padding: 11px 6px;
+      font-size:12.5px;
+      gap:5px;
+      min-height: 46px;
+    }
+    .train-controls .btn span.lbl{display:inline;}
+
+    /* Answer rows: line number + counter on top, inputs below */
+    .answers{gap:0;}
+    .answer-row{
+      display: grid;
+      grid-template-columns: 1fr auto;
+      grid-template-rows: auto auto;
+      gap: 6px 10px;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(42,50,66,.5);
+    }
+    .answer-row:first-child{ padding-top: 4px; }
+    .answer-row:last-child{ border-bottom: none; padding-bottom: 4px; }
+
+    .line-num{
+      grid-column: 1;
+      grid-row: 1;
+      text-align: left;
+      width: auto;
+      font-size: 12px;
+      color: #7e8b9c;
+      align-self: center;
+    }
+    .line-num::before{ content: "Строка "; }
+    .counter{
+      grid-column: 2;
+      grid-row: 1;
+      width: auto;
+      text-align: right;
+      font-size: 12px;
+      align-self: center;
+    }
+    .groups-wrap{
+      grid-column: 1 / -1;
+      grid-row: 2;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 5px;
+    }
+    .group-input{
+      font-size: 16px;              /* 16px → no iOS zoom */
+      padding: 12px 2px;
+      text-align: center;
+      letter-spacing: 0.5px;
+      border-radius: 9px;
+      min-height: 48px;
+      width: 100%;
+    }
+    .group-input::placeholder{ font-size: 12px; letter-spacing: 0; }
+
+    .stats{grid-template-columns: repeat(2, 1fr);gap:8px;margin-bottom:18px;}
+    .stat{padding:12px 10px;border-radius:10px;}
+    .stat .val{font-size:20px;}
+    .stat .lbl{font-size:10.5px;}
+
+    .result-line{padding: 12px 0;}
+    .result-head{font-size:12.5px;}
+    .char-row{gap:8px;}
+    .char-label{width:64px;font-size:10px;padding-top:7px;}
+    .char{width:1.4em;height:1.6em;font-size:13px;border-radius:4px;}
+
+    .modal-backdrop{padding: 10px; align-items: flex-end;}
+    .modal{
+      max-width: 100%;
+      border-radius: 18px 18px 0 0;
+      max-height: calc(100dvh - var(--safe-top) - 20px);
+      padding-bottom: var(--safe-bottom);
+      animation: slideUpMobile .25s cubic-bezier(.2,.8,.3,1);
+    }
+    @keyframes slideUpMobile{
+      from{transform: translateY(30px); opacity:0}
+      to{transform: none; opacity:1}
+    }
+    .modal-head{padding: 16px 18px;}
+    .modal-body{padding: 16px 18px;}
+    .modal-foot{
+      padding: 14px 18px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .modal-foot .btn{
+      flex: 1 1 auto;
+      min-width: 0;
+      padding: 12px 14px;
+      font-size: 13.5px;
+    }
+    .modal-foot .btn-ghost{margin-right: 0;}
+
+    .setting{margin-bottom: 18px;}
+    .setting-row label{font-size:13px;}
+    .setting-val{font-size:12.5px;}
+  }
+
+  @media (max-width: 380px){
+    .mode-grid{grid-template-columns: 1fr;}
+    .brand h1{font-size:14px;}
+    #settingsBtn{padding: 8px 10px;font-size:12.5px;}
+    #settingsBtn .lbl{display:none;}
+    .train-controls .btn{font-size: 12px; padding: 10px 4px;}
+    .group-input{font-size: 15px; padding: 11px 1px; letter-spacing: 0;}
+    .char-label{width: 56px; font-size: 9.5px;}
+    .char{width: 1.3em; height: 1.5em; font-size: 12px;}
+    .stat .val{font-size:18px;}
+    .stat .lbl{font-size:10px;}
+  }
+
+  /* Landscape phones: keep controls compact */
+  @media (max-height: 500px) and (orientation: landscape){
+    .card{padding: 12px;}
+    .answer-row{padding: 8px 0;}
+    .group-input{min-height: 40px; padding: 8px 2px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">··–</div>
+    <div class="brand-text">
+      <h1>Тренажёр азбуки Морзе</h1>
+      <div class="sub">Приём на слух · группы по 5 знаков</div>
+    </div>
+  </div>
+  <button id="settingsBtn" class="btn btn-ghost" aria-label="Настройки">
+    <span aria-hidden="true">⚙</span><span class="lbl"> Настройки</span>
+  </button>
+</header>
+
+<main>
+
+  <!-- ============ SETUP ============ -->
+  <section class="card" id="setupCard">
+    <h2>Параметры тренировки</h2>
+
+    <div class="field">
+      <label>Набор символов</label>
+      <div class="mode-grid" id="modeGrid">
+        <button class="mode-btn active" data-mode="ru">Русские буквы<span class="mhint">32 буквы</span></button>
+        <button class="mode-btn" data-mode="en">Английские буквы<span class="mhint">26 букв A–Z</span></button>
+        <button class="mode-btn" data-mode="digits">Цифры<span class="mhint">0 – 9</span></button>
+        <button class="mode-btn" data-mode="mix">Русские буквы + цифры<span class="mhint">42 знака</span></button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Количество строк</label>
+      <div class="range-row">
+        <input type="range" id="linesRange" min="5" max="20" step="1" value="10" aria-label="Количество строк">
+        <div class="range-val" id="linesValue">10</div>
+      </div>
+    </div>
+
+    <button id="startBtn" class="btn btn-primary btn-lg">▶ Начать тренировку</button>
+  </section>
+
+  <!-- ============ TRAINING ============ -->
+  <section class="card hidden" id="trainCard">
+    <div class="train-head">
+      <div class="status playing" id="status">
+        <span class="pulse"></span>
+        <span id="statusText">Подготовка…</span>
+      </div>
+      <div class="train-controls">
+        <button id="pauseBtn" class="btn btn-ghost" disabled><span aria-hidden="true">⏸</span> <span class="lbl">Пауза</span></button>
+        <button id="stopBtn" class="btn btn-danger"><span aria-hidden="true">⏹</span> <span class="lbl">Отмена</span></button>
+        <button id="checkBtn" class="btn btn-primary" disabled><span class="lbl">Проверить</span></button>
+      </div>
+    </div>
+    <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="answers" id="answers"></div>
+  </section>
+
+  <!-- ============ RESULTS ============ -->
+  <section class="card hidden" id="resultCard">
+    <h2>Результат</h2>
+    <div class="stats" id="stats"></div>
+    <div id="results"></div>
+    <button id="againBtn" class="btn btn-primary btn-lg" style="margin-top:24px;">Новая тренировка</button>
+  </section>
+
+</main>
+
+<!-- ============ SETTINGS MODAL ============ -->
+<div class="modal-backdrop hidden" id="modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-head">
+      <h2 id="modalTitle">Настройки звука</h2>
+      <button class="icon-btn" id="modalClose" aria-label="Закрыть">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="setting">
+        <div class="setting-row">
+          <label for="setFreq">Частота тона</label>
+          <span class="setting-val" id="freqVal">700 Гц</span>
+        </div>
+        <input type="range" id="setFreq" min="300" max="1200" step="10" value="700">
+      </div>
+
+      <div class="setting">
+        <div class="setting-row">
+          <label for="setWave">Тембр (форма волны)</label>
+        </div>
+        <select id="setWave">
+          <option value="sine">Синус — мягкий</option>
+          <option value="triangle">Треугольник — средний</option>
+          <option value="square">Меандр — резкий</option>
+          <option value="sawtooth">Пилообразный — жужжащий</option>
+        </select>
+      </div>
+
+      <div class="setting">
+        <div class="setting-row">
+          <label for="setVol">Громкость</label>
+          <span class="setting-val" id="volVal">70 %</span>
+        </div>
+        <input type="range" id="setVol" min="0" max="100" step="1" value="70">
+      </div>
+
+      <div class="setting">
+        <div class="setting-row">
+          <label for="setWpm">Скорость передачи</label>
+          <span class="setting-val" id="wpmVal">15 WPM</span>
+        </div>
+        <input type="range" id="setWpm" min="5" max="30" step="1" value="15">
+      </div>
+
+      <button class="btn btn-ghost" id="testSound">🔊 Проверить звук</button>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" id="resetSettings">Сбросить</button>
+      <button class="btn btn-primary" id="saveSettings">Готово</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   Таблица азбуки Морзе
+   ========================================================= */
+const MORSE = {
+  'A':'.-',    'B':'-...',  'C':'-.-.',  'D':'-..',   'E':'.',
+  'F':'..-.',  'G':'--.',   'H':'....',  'I':'..',    'J':'.---',
+  'K':'-.-',   'L':'.-..',  'M':'--',    'N':'-.',    'O':'---',
+  'P':'.--.',  'Q':'--.-',  'R':'.-.',   'S':'...',   'T':'-',
+  'U':'..-',   'V':'...-',  'W':'.--',   'X':'-..-',  'Y':'-.--',
+  'Z':'--..',
+  'А':'.-',    'Б':'-...',  'В':'.--',   'Г':'--.',   'Д':'-..',
+  'Е':'.',     'Ж':'...-',  'З':'--..',  'И':'..',    'Й':'.---',
+  'К':'-.-',   'Л':'.-..',  'М':'--',    'Н':'-.',    'О':'---',
+  'П':'.--.',  'Р':'.-.',   'С':'...',   'Т':'-',     'У':'..-',
+  'Ф':'..-.',  'Х':'....',  'Ц':'-.-.',  'Ч':'---.',  'Ш':'----',
+  'Щ':'--.-',  'Ъ':'--.--', 'Ы':'-.--',  'Ь':'-..-',  'Э':'..-..',
+  'Ю':'..--',  'Я':'.-.-',
+  '0':'-----', '1':'.----', '2':'..---', '3':'...--', '4':'....-',
+  '5':'.....', '6':'-....', '7':'--...', '8':'---..', '9':'----.'
+};
+
+const POOLS = {
+  ru:     'АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ'.split(''),
+  en:     'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''),
+  digits: '0123456789'.split('')
+};
+POOLS.mix = POOLS.ru.concat(POOLS.digits);
+
+const GROUPS_PER_LINE = 5;
+const CHARS_PER_GROUP = 5;
+
+/* =========================================================
+   Настройки
+   ========================================================= */
+const STORAGE_KEY = 'morse-trainer-settings-v1';
+const DEFAULTS = { freq: 700, wave: 'sine', volume: 70, wpm: 15 };
+
+function loadSettings(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return {...DEFAULTS};
+    return {...DEFAULTS, ...JSON.parse(raw)};
+  }catch(e){ return {...DEFAULTS}; }
+}
+let settings = loadSettings();
+
+function persistSettings(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(settings)); }catch(e){}
+}
+
+/* =========================================================
+   DOM
+   ========================================================= */
+const $ = id => document.getElementById(id);
+
+const setupCard   = $('setupCard');
+const trainCard   = $('trainCard');
+const resultCard  = $('resultCard');
+
+const modeGrid    = $('modeGrid');
+const linesRange  = $('linesRange');
+const linesValue  = $('linesValue');
+const startBtn    = $('startBtn');
+
+const statusEl    = $('status');
+const statusText  = $('statusText');
+const progressBar = $('progressBar');
+const answersEl   = $('answers');
+const checkBtn    = $('checkBtn');
+const pauseBtn    = $('pauseBtn');
+const stopBtn     = $('stopBtn');
+
+const statsEl     = $('stats');
+const resultsEl   = $('results');
+const againBtn    = $('againBtn');
+
+const modal       = $('modal');
+const settingsBtn = $('settingsBtn');
+const modalClose  = $('modalClose');
+const saveSettingsBtn = $('saveSettings');
+const resetSettingsBtn = $('resetSettings');
+const testSoundBtn = $('testSound');
+
+const setFreq = $('setFreq'), freqVal = $('freqVal');
+const setWave = $('setWave');
+const setVol  = $('setVol'),  volVal  = $('volVal');
+const setWpm  = $('setWpm'),  wpmVal  = $('wpmVal');
+
+/* =========================================================
+   Состояние
+   ========================================================= */
+let currentMode = 'ru';
+let task = [];
+let isPlaying = false;
+let isPaused = false;
+let scheduledNodes = [];
+let scheduledTimeouts = [];
+let audioCtx = null;
+let masterGain = null;
+let schedule = null;
+let t0 = 0;
+let pausedAt = 0;
+let rafId = null;
+
+/* =========================================================
+   Аудио
+   ========================================================= */
+function getCtx(){
+  if(!audioCtx){
+    const AC = window.AudioContext || window.webkitAudioContext;
+    audioCtx = new AC();
+  }
+  return audioCtx;
+}
+
+function scheduleBeep(ctx, dest, startTime, duration, freq, wave){
+  if(duration <= 0.0005) return;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = wave;
+  osc.frequency.value = freq;
+  osc.connect(gain);
+  gain.connect(dest);
+
+  const ramp = Math.min(0.004, duration * 0.3);
+  gain.gain.setValueAtTime(0.0001, startTime);
+  gain.gain.exponentialRampToValueAtTime(1, startTime + ramp);
+  gain.gain.setValueAtTime(1, startTime + duration - ramp);
+  gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+  osc.start(startTime);
+  osc.stop(startTime + duration + 0.02);
+  scheduledNodes.push(osc);
+}
+
+function stopAllAudio(){
+  scheduledNodes.forEach(n => { try{ n.stop(); }catch(e){} });
+  scheduledNodes = [];
+  scheduledTimeouts.forEach(clearTimeout);
+  scheduledTimeouts = [];
+  if(rafId){ cancelAnimationFrame(rafId); rafId = null; }
+}
+
+/* =========================================================
+   Генерация задания
+   ========================================================= */
+function randomChar(pool){
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function generateTask(mode, lineCount){
+  const pool = POOLS[mode];
+  const lines = [];
+  for(let l = 0; l < lineCount; l++){
+    const groups = [];
+    for(let g = 0; g < GROUPS_PER_LINE; g++){
+      let group = '';
+      let prev = '';
+      for(let c = 0; c < CHARS_PER_GROUP; c++){
+        let ch = randomChar(pool);
+        let guard = 0;
+        while(ch === prev && guard++ < 20) ch = randomChar(pool);
+        group += ch;
+        prev = ch;
+      }
+      groups.push(group);
+    }
+    lines.push(groups);
+  }
+  return lines;
+}
+
+/* =========================================================
+   Расписание сигнала
+   ========================================================= */
+function buildSchedule(lines, dot){
+  const events = [];
+  const lineStarts = [];
+  let t = 0;
+
+  const beep = (dur) => { events.push({ start: t, dur }); t += dur; };
+  const gap  = (dur) => { t += dur; };
+
+  lines.forEach(groups => {
+    lineStarts.push(t);
+    groups.forEach(group => {
+      for(const ch of group){
+        const code = MORSE[ch] || '';
+        for(let i = 0; i < code.length; i++){
+          if(i > 0) gap(dot);
+          beep(code[i] === '.' ? dot : dot * 3);
+        }
+        gap(dot * 3);
+      }
+      gap(dot * 4);
+    });
+    gap(dot * 8);
+  });
+
+  return { events, total: t, lineStarts };
+}
+
+/* =========================================================
+   Запуск тренировки
+   ========================================================= */
+async function startTraining(){
+  const ctx = getCtx();
+  if(ctx.state === 'suspended'){ try{ await ctx.resume(); }catch(e){} }
+  stopAllAudio();
+
+  const lineCount = parseInt(linesRange.value, 10);
+  task = generateTask(currentMode, lineCount);
+
+  setupCard.classList.add('hidden');
+  resultCard.classList.add('hidden');
+  trainCard.classList.remove('hidden');
+  checkBtn.disabled = true;
+  pauseBtn.disabled = false;
+  pauseBtn.innerHTML = '<span aria-hidden="true">⏸</span> <span class="lbl">Пауза</span>';
+  statusEl.className = 'status playing';
+  statusText.textContent = 'Подготовка…';
+  progressBar.style.width = '0%';
+
+  renderAnswerInputs(task);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  const dot = 1.2 / settings.wpm;
+  const { events, total, lineStarts } = buildSchedule(task, dot);
+  schedule = { events, total, lineStarts };
+
+  if(masterGain){ try{ masterGain.disconnect(); }catch(e){} }
+  masterGain = ctx.createGain();
+  masterGain.gain.value = settings.volume / 100;
+  masterGain.connect(ctx.destination);
+
+  t0 = ctx.currentTime + 0.35;
+  pausedAt = 0;
+  isPlaying = true;
+  isPaused = false;
+
+  events.forEach(ev => {
+    scheduleBeep(ctx, masterGain, t0 + ev.start, ev.dur, settings.freq, settings.wave);
+  });
+
+  scheduleLineIndicators(lineCount);
+  scheduleCompletion();
+
+  rafId = requestAnimationFrame(tickProgress);
+}
+
+function scheduleLineIndicators(lineCount){
+  const ctx = getCtx();
+  schedule.lineStarts.forEach((ls, i) => {
+    if(ls <= pausedAt) return;
+    const delayMs = (t0 + ls - ctx.currentTime) * 1000;
+    if(delayMs < 0) return;
+    scheduledTimeouts.push(setTimeout(() => {
+      if(!isPaused && isPlaying){
+        statusText.textContent = `Воспроизведение · строка ${i + 1} из ${lineCount}`;
+      }
+    }, delayMs));
+  });
+}
+
+function scheduleCompletion(){
+  const ctx = getCtx();
+  const endTime = t0 + schedule.total;
+  const delayMs = (endTime - ctx.currentTime) * 1000;
+  scheduledTimeouts.push(setTimeout(() => {
+    if(isPaused || !isPlaying) return;
+    finishPlayback();
+  }, Math.max(0, delayMs) + 250));
+}
+
+function finishPlayback(){
+  isPlaying = false;
+  isPaused = false;
+  statusEl.className = 'status done';
+  statusText.textContent = 'Воспроизведение завершено — введите услышанное и нажмите «Проверить»';
+  checkBtn.disabled = false;
+  pauseBtn.disabled = true;
+  pauseBtn.innerHTML = '<span aria-hidden="true">⏸</span> <span class="lbl">Пауза</span>';
+  if(rafId){ cancelAnimationFrame(rafId); rafId = null; }
+  progressBar.style.width = '100%';
+}
+
+function tickProgress(){
+  if(!isPlaying || isPaused){ rafId = null; return; }
+  const ctx = getCtx();
+  const elapsed = ctx.currentTime - t0;
+  const p = Math.min(1, elapsed / schedule.total);
+  progressBar.style.width = (p * 100) + '%';
+  if(p < 1) rafId = requestAnimationFrame(tickProgress);
+  else rafId = null;
+}
+
+/* ---------- Пауза / Продолжить ---------- */
+function pauseTraining(){
+  if(!isPlaying || isPaused) return;
+  const ctx = getCtx();
+  pausedAt = ctx.currentTime - t0;
+
+  scheduledNodes.forEach(n => { try{ n.stop(); }catch(e){} });
+  scheduledNodes = [];
+  scheduledTimeouts.forEach(clearTimeout);
+  scheduledTimeouts = [];
+  if(rafId){ cancelAnimationFrame(rafId); rafId = null; }
+
+  const p = Math.min(1, pausedAt / schedule.total);
+  progressBar.style.width = (p * 100) + '%';
+
+  isPaused = true;
+  statusEl.className = 'status paused';
+  statusText.textContent = 'Пауза — можно продолжать ввод';
+  pauseBtn.innerHTML = '<span aria-hidden="true">▶</span> <span class="lbl">Продолжить</span>';
+  checkBtn.disabled = false;
+}
+
+function resumeTraining(){
+  if(!isPlaying || !isPaused) return;
+  const ctx = getCtx();
+  if(ctx.state === 'suspended'){ try{ ctx.resume(); }catch(e){} }
+
+  const elapsed = pausedAt;
+  const newT0 = ctx.currentTime + 0.12;
+  t0 = newT0 - elapsed;
+
+  if(masterGain) masterGain.gain.value = settings.volume / 100;
+
+  schedule.events.forEach(ev => {
+    const evEnd = ev.start + ev.dur;
+    if(evEnd <= elapsed) return;
+    const startOffset = Math.max(0, ev.start - elapsed);
+    const clipStart = Math.max(0, elapsed - ev.start);
+    const dur = ev.dur - clipStart;
+    scheduleBeep(ctx, masterGain, newT0 + startOffset, dur, settings.freq, settings.wave);
+  });
+
+  scheduleLineIndicators(task.length);
+  scheduleCompletion();
+
+  isPaused = false;
+  statusEl.className = 'status playing';
+  statusText.textContent = 'Воспроизведение…';
+  pauseBtn.innerHTML = '<span aria-hidden="true">⏸</span> <span class="lbl">Пауза</span>';
+
+  rafId = requestAnimationFrame(tickProgress);
+}
+
+/* ---------- Отмена ---------- */
+function cancelTraining(){
+  stopAllAudio();
+  isPlaying = false;
+  isPaused = false;
+  pausedAt = 0;
+  if(masterGain){ try{ masterGain.disconnect(); }catch(e){} masterGain = null; }
+  trainCard.classList.add('hidden');
+  setupCard.classList.remove('hidden');
+  answersEl.innerHTML = '';
+  progressBar.style.width = '0%';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* =========================================================
+   Поля ввода ответа (группы по 5)
+   ========================================================= */
+function renderAnswerInputs(lines){
+  answersEl.innerHTML = '';
+
+  lines.forEach((groups, i) => {
+    const row = document.createElement('div');
+    row.className = 'answer-row';
+    row.dataset.line = i;
+
+    const num = document.createElement('span');
+    num.className = 'line-num';
+    num.textContent = String(i + 1);
+
+    const wrap = document.createElement('div');
+    wrap.className = 'groups-wrap';
+
+    for(let g = 0; g < GROUPS_PER_LINE; g++){
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'group-input';
+      input.autocomplete = 'off';
+      input.autocapitalize = 'characters';
+      input.spellcheck = false;
+      input.maxLength = CHARS_PER_GROUP;
+      input.inputMode = 'text';
+      input.enterKeyHint = g === GROUPS_PER_LINE - 1 ? 'next' : 'next';
+      input.dataset.line = i;
+      input.dataset.group = g;
+      input.setAttribute('aria-label', `Строка ${i + 1}, группа ${g + 1}`);
+
+      input.addEventListener('input', handleGroupInput);
+      input.addEventListener('keydown', handleGroupKeydown);
+      input.addEventListener('paste', handleGroupPaste);
+      input.addEventListener('focus', () => {
+        // Небольшой скролл, чтобы поле не оказалось под клавиатурой
+        setTimeout(() => {
+          input.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        }, 120);
+      });
+
+      wrap.appendChild(input);
+    }
+
+    const counter = document.createElement('span');
+    counter.className = 'counter';
+    counter.textContent = `0/${GROUPS_PER_LINE * CHARS_PER_GROUP}`;
+
+    row.append(num, wrap, counter);
+    answersEl.appendChild(row);
+  });
+
+  const first = answersEl.querySelector('.group-input');
+  if(first) first.focus();
+}
+
+function getAllInputs(){
+  return [...answersEl.querySelectorAll('.group-input')];
+}
+
+function updateLineCounter(lineIdx){
+  const row = answersEl.querySelector(`.answer-row[data-line="${lineIdx}"]`);
+  if(!row) return;
+  const counter = row.querySelector('.counter');
+  if(!counter) return;
+  const total = GROUPS_PER_LINE * CHARS_PER_GROUP;
+  let typed = 0;
+  row.querySelectorAll('.group-input').forEach(inp => { typed += inp.value.length; });
+  counter.textContent = `${typed}/${total}`;
+  counter.classList.toggle('complete', typed >= total);
+}
+
+function filterToPool(str){
+  const pool = POOLS[currentMode];
+  return str.toUpperCase().split('').filter(ch => pool.includes(ch)).join('');
+}
+
+function handleGroupInput(e){
+  const input = e.target;
+  const lineIdx = parseInt(input.dataset.line, 10);
+
+  let v = filterToPool(input.value);
+  if(v.length > CHARS_PER_GROUP) v = v.slice(0, CHARS_PER_GROUP);
+  if(v !== input.value){
+    const pos = Math.min(v.length, v.length);
+    input.value = v;
+    try{ input.setSelectionRange(pos, pos); }catch(err){}
+  }
+
+  updateLineCounter(lineIdx);
+
+  if(v.length === CHARS_PER_GROUP){
+    const all = getAllInputs();
+    const idx = all.indexOf(input);
+    if(idx >= 0 && idx < all.length - 1){
+      const next = all[idx + 1];
+      next.focus();
+      try{ next.setSelectionRange(next.value.length, next.value.length); }catch(err){}
+    }
+  }
+}
+
+function handleGroupKeydown(e){
+  const input = e.target;
+
+  if(e.key === 'Backspace' && input.value === ''){
+    const all = getAllInputs();
+    const idx = all.indexOf(input);
+    if(idx > 0){
+      e.preventDefault();
+      const prev = all[idx - 1];
+      if(prev.value.length > 0){
+        prev.value = prev.value.slice(0, -1);
+        updateLineCounter(parseInt(prev.dataset.line, 10));
+      }
+      prev.focus();
+      setTimeout(() => {
+        try{ prev.setSelectionRange(prev.value.length, prev.value.length); }catch(err){}
+      }, 0);
+    }
+    return;
+  }
+
+  if(e.key === 'ArrowLeft' && input.selectionStart === 0){
+    const all = getAllInputs();
+    const idx = all.indexOf(input);
+    if(idx > 0){
+      e.preventDefault();
+      const prev = all[idx - 1];
+      prev.focus();
+      try{ prev.setSelectionRange(prev.value.length, prev.value.length); }catch(err){}
+    }
+  } else if(e.key === 'ArrowRight' && input.selectionStart === input.value.length){
+    const all = getAllInputs();
+    const idx = all.indexOf(input);
+    if(idx >= 0 && idx < all.length - 1){
+      e.preventDefault();
+      const next = all[idx + 1];
+      next.focus();
+      try{ next.setSelectionRange(next.value.length, next.value.length); }catch(err){}
+    }
+  } else if(e.key === 'Enter'){
+    e.preventDefault();
+    if(!checkBtn.disabled) checkBtn.click();
+  }
+}
+
+function handleGroupPaste(e){
+  const text = (e.clipboardData || window.clipboardData).getData('text');
+  if(!text) return;
+  const clean = filterToPool(text);
+  if(!clean) return;
+
+  e.preventDefault();
+
+  const all = getAllInputs();
+  let idx = all.indexOf(e.target);
+  if(idx < 0) return;
+
+  if(all[idx].value.length >= CHARS_PER_GROUP) idx++;
+
+  for(const ch of clean){
+    if(idx >= all.length) break;
+    const inp = all[idx];
+    if(inp.value.length < CHARS_PER_GROUP){
+      inp.value += ch;
+      updateLineCounter(parseInt(inp.dataset.line, 10));
+    }
+    if(inp.value.length >= CHARS_PER_GROUP) idx++;
+  }
+
+  if(idx < all.length){
+    const next = all[idx];
+    next.focus();
+    try{ next.setSelectionRange(next.value.length, next.value.length); }catch(err){}
+  }
+}
+
+function normalizeAnswer(str){
+  return String(str).toUpperCase().replace(/[^A-ZА-Я0-9]/g, '');
+}
+
+/* =========================================================
+   Проверка
+   ========================================================= */
+function checkAnswers(){
+  if(isPlaying && !isPaused) return;
+  stopAllAudio();
+  isPlaying = false;
+  isPaused = false;
+
+  const correctLines = task.map(groups => groups.join(''));
+
+  const all = getAllInputs();
+  const byLine = {};
+  all.forEach(inp => {
+    const l = parseInt(inp.dataset.line, 10);
+    if(!byLine[l]) byLine[l] = [];
+    byLine[l].push(inp);
+  });
+
+  const playerLines = correctLines.map((_, i) => {
+    const arr = byLine[i] || [];
+    return arr.map(inp => normalizeAnswer(inp.value)).join('');
+  });
+
+  let totalChars = 0;
+  let totalCorrect = 0;
+  let perfectLines = 0;
+  let html = '';
+
+  correctLines.forEach((correct, i) => {
+    const answer = playerLines[i] || '';
+    const maxLen = Math.max(correct.length, answer.length);
+
+    let lineCorrect = 0;
+    let playerRow = '';
+    let correctRow = '';
+
+    for(let j = 0; j < maxLen; j++){
+      const c = correct[j];
+      const a = answer[j];
+      const ok = (c !== undefined && a !== undefined && c === a);
+      if(ok) lineCorrect++;
+
+      if(a !== undefined){
+        playerRow += `<span class="char ${ok ? 'c-ok' : 'c-bad'}">${escapeHtml(a)}</span>`;
+      }else{
+        playerRow += `<span class="char c-miss">–</span>`;
+      }
+
+      if(c !== undefined){
+        correctRow += `<span class="char ${ok ? 'c-ok' : 'c-bad'}">${escapeHtml(c)}</span>`;
+      }else{
+        correctRow += `<span class="char c-miss">–</span>`;
+      }
+    }
+
+    totalChars += correct.length;
+    totalCorrect += lineCorrect;
+    if(lineCorrect === correct.length && answer.length === correct.length) perfectLines++;
+
+    let badgeClass = '';
+    if(lineCorrect === correct.length && answer.length === correct.length) badgeClass = 'perfect';
+    else if(lineCorrect === 0) badgeClass = 'zero';
+
+    html += `
+      <div class="result-line">
+        <div class="result-head">
+          <span>Строка ${i + 1}</span>
+          <span class="badge ${badgeClass}">${lineCorrect} / ${correct.length}</span>
+        </div>
+        <div class="char-row">
+          <span class="char-label">Ваш ответ</span>
+          <div class="chars">${playerRow}</div>
+        </div>
+        <div class="char-row">
+          <span class="char-label">Эталон</span>
+          <div class="chars">${correctRow}</div>
+        </div>
+      </div>`;
+  });
+
+  const accuracy = totalChars ? Math.round(totalCorrect / totalChars * 100) : 0;
+  const accClass = accuracy >= 90 ? 'good' : (accuracy < 50 ? 'bad' : '');
+
+  statsEl.innerHTML = `
+    <div class="stat">
+      <div class="val">${correctLines.length}</div>
+      <div class="lbl">Строк</div>
+    </div>
+    <div class="stat">
+      <div class="val">${totalChars}</div>
+      <div class="lbl">Знаков всего</div>
+    </div>
+    <div class="stat good">
+      <div class="val">${totalCorrect}</div>
+      <div class="lbl">Верно</div>
+    </div>
+    <div class="stat ${accClass}">
+      <div class="val">${accuracy}%</div>
+      <div class="lbl">Точность</div>
+    </div>
+    <div class="stat">
+      <div class="val">${perfectLines}</div>
+      <div class="lbl">Строк без ошибок</div>
+    </div>`;
+
+  resultsEl.innerHTML = html;
+
+  trainCard.classList.add('hidden');
+  resultCard.classList.remove('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, m => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[m]));
+}
+
+/* =========================================================
+   Настройки — модальное окно
+   ========================================================= */
+function openModal(){
+  setFreq.value = settings.freq;   freqVal.textContent = settings.freq + ' Гц';
+  setWave.value = settings.wave;
+  setVol.value  = settings.volume; volVal.textContent  = settings.volume + ' %';
+  setWpm.value  = settings.wpm;    wpmVal.textContent  = settings.wpm + ' WPM';
+  modal.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(){
+  modal.classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
+function applySettingsFromUI(){
+  settings.freq   = parseInt(setFreq.value, 10);
+  settings.wave   = setWave.value;
+  settings.volume = parseInt(setVol.value, 10);
+  settings.wpm    = parseInt(setWpm.value, 10);
+
+  freqVal.textContent = settings.freq + ' Гц';
+  volVal.textContent  = settings.volume + ' %';
+  wpmVal.textContent  = settings.wpm + ' WPM';
+
+  if(masterGain) masterGain.gain.value = settings.volume / 100;
+
+  persistSettings();
+}
+
+function playTestTone(){
+  const ctx = getCtx();
+  if(ctx.state === 'suspended'){ ctx.resume(); }
+
+  const dot = 1.2 / settings.wpm;
+  const g = ctx.createGain();
+  g.gain.value = settings.volume / 100;
+  g.connect(ctx.destination);
+
+  const code = '...-';
+  let t = ctx.currentTime + 0.05;
+
+  [...code].forEach((el, i) => {
+    if(i > 0) t += dot;
+    const dur = el === '.' ? dot : dot * 3;
+    scheduleBeep(ctx, g, t, dur, settings.freq, settings.wave);
+    t += dur;
+  });
+}
+
+/* =========================================================
+   Обработчики
+   ========================================================= */
+modeGrid.addEventListener('click', e => {
+  const btn = e.target.closest('.mode-btn');
+  if(!btn) return;
+  [...modeGrid.children].forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentMode = btn.dataset.mode;
+});
+
+linesRange.addEventListener('input', () => {
+  linesValue.textContent = linesRange.value;
+});
+
+startBtn.addEventListener('click', startTraining);
+checkBtn.addEventListener('click', checkAnswers);
+
+pauseBtn.addEventListener('click', () => {
+  if(!isPlaying) return;
+  if(isPaused) resumeTraining();
+  else pauseTraining();
+});
+
+stopBtn.addEventListener('click', cancelTraining);
+
+againBtn.addEventListener('click', () => {
+  stopAllAudio();
+  isPlaying = false;
+  isPaused = false;
+  resultCard.classList.add('hidden');
+  trainCard.classList.add('hidden');
+  setupCard.classList.remove('hidden');
+  answersEl.innerHTML = '';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+/* --- Модальное окно --- */
+settingsBtn.addEventListener('click', openModal);
+modalClose.addEventListener('click', closeModal);
+saveSettingsBtn.addEventListener('click', closeModal);
+modal.addEventListener('click', e => { if(e.target === modal) closeModal(); });
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
+});
+
+resetSettingsBtn.addEventListener('click', () => {
+  settings = {...DEFAULTS};
+  persistSettings();
+  openModal();
+});
+
+testSoundBtn.addEventListener('click', playTestTone);
+
+[setFreq, setVol, setWpm].forEach(el => el.addEventListener('input', applySettingsFromUI));
+setWave.addEventListener('change', applySettingsFromUI);
+
+/* --- Запрет зума по двойному тапу на iOS --- */
+let lastTouchEnd = 0;
+document.addEventListener('touchend', (e) => {
+  const now = Date.now();
+  if(now - lastTouchEnd <= 350) e.preventDefault();
+  lastTouchEnd = now;
+}, { passive: false });
+
+/* =========================================================
+   Инициализация
+   ========================================================= */
+linesValue.textContent = linesRange.value;
+</script>
+</body>
+</html>
