@@ -37,6 +37,8 @@
     min-height:100dvh;
     -webkit-font-smoothing:antialiased;
     overscroll-behavior-y: none;
+    display: flex;
+    flex-direction: column;
   }
 
   .topbar{
@@ -96,8 +98,9 @@
   #settingsBtn{padding: 9px 14px; font-size: 13.5px;}
 
   main{
-    max-width:880px;margin:0 auto;
-    padding: 24px calc(18px + var(--safe-right)) calc(60px + var(--safe-bottom)) calc(18px + var(--safe-left));
+    max-width:880px;margin:0 auto;width:100%;
+    padding: 24px calc(18px + var(--safe-right)) 24px calc(18px + var(--safe-left));
+    flex: 1 0 auto;
   }
   .card{
     background:linear-gradient(180deg,var(--panel),#141922);
@@ -113,7 +116,6 @@
   .field{margin-bottom:22px;}
   .field > label{display:block;font-size:13px;color:var(--muted);margin-bottom:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;}
 
-  /* ---------- Mode grid ---------- */
   .mode-grid{
     display:grid;
     grid-template-columns:repeat(2, 1fr);
@@ -144,7 +146,6 @@
   .mode-btn .mhint{display:block;font-size:11.5px;color:var(--muted);font-weight:500;margin-top:3px;}
   .mode-btn.active .mhint{color:#a8c4ff;}
 
-  /* ---------- Personal panel ---------- */
   .personal-panel{
     margin-top:14px;
     padding:16px;
@@ -201,7 +202,6 @@
   .personal-info.empty{ color:#e3b341; }
   .personal-info.error{ color:var(--red); }
 
-  /* ---------- Range ---------- */
   .range-row{display:flex;align-items:center;gap:16px;}
   input[type=range]{
     -webkit-appearance:none;appearance:none;
@@ -232,7 +232,6 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* ---------- Training ---------- */
   .train-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:14px;}
   .status{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--muted);font-weight:550;line-height:1.3;}
   .status.playing{color:var(--text);}
@@ -290,7 +289,6 @@
   }
   .counter.complete{color:var(--green);}
 
-  /* ---------- Results ---------- */
   .stats{
     display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
     gap:12px;margin-bottom:24px;
@@ -338,7 +336,26 @@
   .char.c-bad{background:rgba(248,81,73,.14);color:var(--red);}
   .char.c-miss{background:rgba(255,255,255,.03);color:#4a5567;}
 
-  /* ---------- Modal ---------- */
+  .site-footer{
+    flex-shrink: 0;
+    padding: 22px calc(18px + var(--safe-right)) calc(22px + var(--safe-bottom)) calc(18px + var(--safe-left));
+    border-top: 1px solid var(--border);
+    background: rgba(10,13,18,.6);
+    color: var(--muted);
+    font-size: 12.5px;
+    text-align: center;
+    line-height: 1.6;
+  }
+  .site-footer a{
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color .15s ease;
+    border-bottom: 1px dashed transparent;
+  }
+  .site-footer a:hover{ color: #7eaaff; border-bottom-color: currentColor; }
+  .site-footer .sep{ margin: 0 8px; opacity: .5; }
+
   .modal-backdrop{
     position:fixed;inset:0;z-index:100;
     background:rgba(6,9,13,.72);
@@ -373,9 +390,56 @@
     display:flex;gap:10px;justify-content:flex-end;
     padding:16px 20px;border-top:1px solid var(--border);
     flex: none;
+    align-items: center;
   }
   .modal-foot .btn{flex:0 0 auto;}
   .modal-foot .btn-ghost{margin-right:auto;}
+
+  .dev-credit{
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 12.5px;
+    color: var(--muted);
+    flex-wrap: wrap;
+  }
+  .dev-credit .dev-label{
+    text-transform: uppercase;
+    font-size: 10.5px;
+    letter-spacing: .7px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+  .dev-credit a{
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--panel-2);
+    transition: .15s ease;
+    touch-action: manipulation;
+  }
+  .dev-credit a:hover{
+    background: #232c3d;
+    border-color: #38455c;
+    color: #7eaaff;
+  }
+  .dev-credit a svg{
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+    opacity: .9;
+  }
+  .dev-credit a:active{ transform: scale(.97); }
 
   .setting{margin-bottom:20px;}
   .setting:last-of-type{margin-bottom:8px;}
@@ -404,7 +468,7 @@
     #settingsBtn{padding: 9px 12px;font-size:13px;}
 
     main{
-      padding: 14px calc(12px + var(--safe-right)) calc(48px + var(--safe-bottom)) calc(12px + var(--safe-left));
+      padding: 14px calc(12px + var(--safe-right)) 14px calc(12px + var(--safe-left));
     }
     .card{padding:16px;border-radius:12px;margin-bottom:14px;}
     .card h2{font-size:15px;margin-bottom:14px;}
@@ -531,6 +595,12 @@
     .setting{margin-bottom: 18px;}
     .setting-row label{font-size:13px;}
     .setting-val{font-size:12.5px;}
+
+    .dev-credit{font-size: 12px;}
+    .dev-credit .dev-label{font-size: 10px;}
+    .dev-credit a{font-size: 12px;padding: 5px 9px;}
+
+    .site-footer{font-size: 12px; padding-top: 18px;}
   }
 
   @media (max-width: 380px){
@@ -545,6 +615,7 @@
     .char-toggle{min-width:30px;height:30px;font-size:12px;padding:0 5px;}
     .stat .val{font-size:18px;}
     .stat .lbl{font-size:10px;}
+    .dev-credit{flex-direction: column; align-items: flex-start;}
   }
 
   @media (max-height: 500px) and (orientation: landscape){
@@ -584,13 +655,13 @@
         <button class="mode-btn" data-mode="personal">Персональный<span class="mhint" id="personalHint">выбрать символы</span></button>
       </div>
 
-      <!-- Personal selection panel -->
       <div class="personal-panel hidden" id="personalPanel">
         <div class="personal-controls">
           <button type="button" class="btn btn-ghost btn-xs" data-preset="all">Все</button>
           <button type="button" class="btn btn-ghost btn-xs" data-preset="ru">Только русские</button>
           <button type="button" class="btn btn-ghost btn-xs" data-preset="en">Только английские</button>
           <button type="button" class="btn btn-ghost btn-xs" data-preset="digits">Только цифры</button>
+          <button type="button" class="btn btn-ghost btn-xs" data-preset="special">Только спецсимволы</button>
           <button type="button" class="btn btn-ghost btn-xs" data-preset="clear">Сбросить</button>
         </div>
         <div class="personal-groups">
@@ -606,6 +677,10 @@
             <div class="personal-group-title">Цифры</div>
             <div class="personal-chars" id="personalDigits"></div>
           </div>
+          <div class="personal-group">
+            <div class="personal-group-title">Спецсимволы</div>
+            <div class="personal-chars" id="personalSpecial"></div>
+          </div>
         </div>
         <div class="personal-info" id="personalInfo">Ничего не выбрано — отметьте хотя бы один символ</div>
       </div>
@@ -614,8 +689,8 @@
     <div class="field">
       <label>Количество строк</label>
       <div class="range-row">
-        <input type="range" id="linesRange" min="5" max="20" step="1" value="10" aria-label="Количество строк">
-        <div class="range-val" id="linesValue">10</div>
+        <input type="range" id="linesRange" min="1" max="20" step="1" value="5" aria-label="Количество строк">
+        <div class="range-val" id="linesValue">5</div>
       </div>
     </div>
 
@@ -646,6 +721,13 @@
   </section>
 
 </main>
+
+<footer class="site-footer">
+  <span>Тренажёр азбуки Морзе</span>
+  <span class="sep">·</span>
+  <span>Разработчик: </span>
+  <a href="https://github.com/Dmitry-prg" target="_blank" rel="noopener noreferrer">Dmitry Davydov</a>
+</footer>
 
 <div class="modal-backdrop hidden" id="modal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
@@ -691,6 +773,16 @@
       </div>
 
       <button class="btn btn-ghost" id="testSound">🔊 Проверить звук</button>
+
+      <div class="dev-credit">
+        <span class="dev-label">Разработчик</span>
+        <a href="https://github.com/Dmitry-prg" target="_blank" rel="noopener noreferrer" aria-label="Профиль разработчика на GitHub">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.1.79-.25.79-.55 0-.27-.01-1.17-.01-2.12-3.2.7-3.88-1.35-3.88-1.35-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.04 0 0 .97-.31 3.18 1.18a11.07 11.07 0 0 1 5.79 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.58.23 2.75.11 3.04.74.81 1.19 1.84 1.19 3.1 0 4.42-2.7 5.39-5.26 5.68.41.36.78 1.06.78 2.14 0 1.55-.01 2.79-.01 3.17 0 .31.21.67.8.55C20.22 21.39 23.5 17.08 23.5 12 23.5 5.65 18.35.5 12 .5z"/>
+          </svg>
+          Dmitry Davydov
+        </a>
+      </div>
     </div>
     <div class="modal-foot">
       <button class="btn btn-ghost" id="resetSettings">Сбросить</button>
@@ -701,9 +793,14 @@
 
 <script>
 /* =========================================================
-   Таблица азбуки Морзе — БЕЗ "Ъ" (31 русская буква)
+   Таблица азбуки Морзе
+   ---------------------------------------------------------
+   Русские буквы (31, без Ъ)
+   Спецсимволы приведены к традиционному русскому стандарту
+   (в соответствии с таблицей: . , : ; ? ! - « ( / )
    ========================================================= */
 const MORSE = {
+  // Латиница
   'A':'.-',    'B':'-...',  'C':'-.-.',  'D':'-..',   'E':'.',
   'F':'..-.',  'G':'--.',   'H':'....',  'I':'..',    'J':'.---',
   'K':'-.-',   'L':'.-..',  'M':'--',    'N':'-.',    'O':'---',
@@ -720,18 +817,46 @@ const MORSE = {
   'Ю':'..--',  'Я':'.-.-',
   // Цифры
   '0':'-----', '1':'.----', '2':'..---', '3':'...--', '4':'....-',
-  '5':'.....', '6':'-....', '7':'--...', '8':'---..', '9':'----.'
+  '5':'.....', '6':'-....', '7':'--...', '8':'---..', '9':'----.',
+  // Спецсимволы (знаки препинания) — по фото
+  '.':'......',
+  ',':'.-.-.-',
+  ':':'---...',
+  ';':'-.-.-.',
+  '?':'..--..',
+  '!':'--..--',
+  '-':'-....-',
+  '«':'.-..-.',
+  '(':'-.--.',
+  ')':'-.--.-',
+  '/':'-..-.',
+  // Дополнительные полезные знаки
+  "'":'.----.',
+  '&':'.-...',
+  '=':'-...-',
+  '+':'.-.-.',
+  '_':'..--.-',
+  '»':'.-..-.', // Парные к « (в Морзе совпадают)
+  '$':'...-..-',
+  '@':'.--.-.'
 };
 
 const POOLS = {
   ru:     'АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЫЬЭЮЯ'.split(''),   // 31
   en:     'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''),          // 26
-  digits: '0123456789'.split('')                           // 10
+  digits: '0123456789'.split(''),                          // 10
+  // Спецсимволы в порядке, как на фото + дополнения
+  special: ['.', ',', ':', ';', '?', '!', '-', '«', '(', ')', '/', "'", '&', '=', '+', '_', '»', '$', '@']
 };
 POOLS.mix = POOLS.ru.concat(POOLS.digits);                 // 41
 
 const GROUPS_PER_LINE = 5;
 const CHARS_PER_GROUP = 5;
+
+/* =========================================================
+   КОЭФФИЦИЕНТ ПАУЗ МЕЖДУ СИМВОЛАМИ (+25%)
+   ========================================================= */
+const CHAR_GAP_FACTOR = 1.25;
 
 /* =========================================================
    Персональный выбор символов
@@ -745,7 +870,7 @@ let personalSelection = new Set();
     if(!raw) return;
     const arr = JSON.parse(raw);
     if(!Array.isArray(arr)) return;
-    const known = new Set([...POOLS.ru, ...POOLS.en, ...POOLS.digits]);
+    const known = new Set([...POOLS.ru, ...POOLS.en, ...POOLS.digits, ...POOLS.special]);
     arr.forEach(ch => {
       if(typeof ch === 'string' && known.has(ch)) personalSelection.add(ch);
     });
@@ -758,7 +883,7 @@ function savePersonal(){
 
 function getPool(mode){
   if(mode === 'personal'){
-    const all = [...POOLS.ru, ...POOLS.en, ...POOLS.digits];
+    const all = [...POOLS.ru, ...POOLS.en, ...POOLS.digits, ...POOLS.special];
     return all.filter(ch => personalSelection.has(ch));
   }
   return POOLS[mode] || [];
@@ -834,7 +959,7 @@ const setVol  = $('setVol'),  volVal  = $('volVal');
 const setWpm  = $('setWpm'),  wpmVal  = $('wpmVal');
 
 /* =========================================================
-   АУДИО-ДВИЖОК (mobile-friendly)
+   АУДИО-ДВИЖОК
    ========================================================= */
 let audioCtx = null;
 let masterGain = null;
@@ -936,7 +1061,7 @@ let schedule = null;
 let t0 = 0;
 let pausedAt = 0;
 let rafId = null;
-let trainingPool = [];   // снимок пула на момент старта тренировки
+let trainingPool = [];
 
 /* =========================================================
    Генерация задания
@@ -977,20 +1102,25 @@ function buildSchedule(lines, dot){
   const beep = (dur) => { events.push({ start: t, dur }); t += dur; };
   const gap  = (dur) => { t += dur; };
 
+  const intraGap = dot;
+  const charGap  = dot * 3 * CHAR_GAP_FACTOR;
+  const groupGap = dot * 4 * CHAR_GAP_FACTOR;
+  const lineGap  = dot * 8 * CHAR_GAP_FACTOR;
+
   lines.forEach(groups => {
     lineStarts.push(t);
     groups.forEach(group => {
       for(const ch of group){
         const code = MORSE[ch] || '';
         for(let i = 0; i < code.length; i++){
-          if(i > 0) gap(dot);
+          if(i > 0) gap(intraGap);
           beep(code[i] === '.' ? dot : dot * 3);
         }
-        gap(dot * 3);
+        gap(charGap);
       }
-      gap(dot * 4);
+      gap(groupGap);
     });
-    gap(dot * 8);
+    gap(lineGap);
   });
 
   return { events, total: t, lineStarts };
@@ -1006,7 +1136,6 @@ async function startTraining(){
   }
   stopAllAudio();
 
-  // Проверка персонального режима
   if(currentMode === 'personal'){
     const pool = getPool('personal');
     if(pool.length === 0){
@@ -1172,7 +1301,7 @@ function cancelTraining(){
 }
 
 /* =========================================================
-   Персональная панель — рендер и обновление
+   Персональная панель
    ========================================================= */
 function updatePersonalHint(){
   if(!personalHint) return;
@@ -1197,7 +1326,8 @@ function renderPersonalChars(){
   const groups = [
     { id: 'personalRu',     chars: POOLS.ru },
     { id: 'personalEn',     chars: POOLS.en },
-    { id: 'personalDigits', chars: POOLS.digits }
+    { id: 'personalDigits', chars: POOLS.digits },
+    { id: 'personalSpecial', chars: POOLS.special }
   ];
   groups.forEach(g => {
     const el = $(g.id);
@@ -1232,10 +1362,11 @@ function renderPersonalChars(){
 function setPersonalPreset(preset){
   personalSelection.clear();
   const pools = {
-    all:    [...POOLS.ru, ...POOLS.en, ...POOLS.digits],
+    all:    [...POOLS.ru, ...POOLS.en, ...POOLS.digits, ...POOLS.special],
     ru:     POOLS.ru,
     en:     POOLS.en,
     digits: POOLS.digits,
+    special: POOLS.special,
     clear:  []
   };
   (pools[preset] || []).forEach(ch => personalSelection.add(ch));
@@ -1430,7 +1561,8 @@ function handleGroupPaste(e){
 }
 
 function normalizeAnswer(str){
-  return String(str).toUpperCase().replace(/[^A-ZА-Я0-9]/g, '');
+  const pool = trainingPool.length ? trainingPool : getPool(currentMode);
+  return String(str).toUpperCase().split('').filter(ch => pool.includes(ch)).join('');
 }
 
 /* =========================================================
@@ -1643,7 +1775,6 @@ modeGrid.addEventListener('click', e => {
   }
 });
 
-/* Пресеты в персональной панели */
 personalPanel.addEventListener('click', e => {
   const btn = e.target.closest('[data-preset]');
   if(!btn) return;
