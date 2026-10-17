@@ -84,6 +84,7 @@
   .btn-danger{background:var(--panel-2);color:#ffb0ac;border-color:rgba(248,81,73,.35);}
   .btn-danger:hover:not(:disabled){background:rgba(248,81,73,.12);border-color:var(--red);}
   .btn-lg{padding:14px 26px;font-size:15px;width:100%;min-height:50px;}
+  .btn-xs{font-size:12px;padding:6px 12px;min-height:32px;border-radius:8px;}
   .icon-btn{
     background:transparent;border:none;color:var(--muted);
     font-size:18px;cursor:pointer;padding:8px;border-radius:9px;line-height:1;
@@ -111,7 +112,20 @@
 
   .field{margin-bottom:22px;}
   .field > label{display:block;font-size:13px;color:var(--muted);margin-bottom:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;}
-  .mode-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;}
+
+  /* ---------- Mode grid ---------- */
+  .mode-grid{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:10px;
+  }
+  .mode-grid .mode-btn[data-mode="personal"]{
+    grid-column: 1 / -1;
+  }
+  @media (min-width: 640px){
+    .mode-grid{ grid-template-columns: repeat(4, 1fr); }
+  }
+
   .mode-btn{
     font:inherit;font-size:14px;font-weight:600;text-align:left;
     padding:14px 16px;border-radius:11px;cursor:pointer;
@@ -130,6 +144,64 @@
   .mode-btn .mhint{display:block;font-size:11.5px;color:var(--muted);font-weight:500;margin-top:3px;}
   .mode-btn.active .mhint{color:#a8c4ff;}
 
+  /* ---------- Personal panel ---------- */
+  .personal-panel{
+    margin-top:14px;
+    padding:16px;
+    background:rgba(15,20,28,.55);
+    border:1px solid var(--border);
+    border-radius:12px;
+    animation: panelIn .2s ease;
+  }
+  @keyframes panelIn{
+    from{ opacity:0; transform: translateY(-6px); }
+    to{ opacity:1; transform: none; }
+  }
+  .personal-controls{
+    display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;
+  }
+  .personal-groups{
+    display:flex;flex-direction:column;gap:14px;
+  }
+  .personal-group-title{
+    font-size:11.5px;color:var(--muted);
+    margin-bottom:8px;
+    text-transform:uppercase;letter-spacing:.6px;font-weight:600;
+  }
+  .personal-chars{
+    display:flex;flex-wrap:wrap;gap:5px;
+  }
+  .char-toggle{
+    min-width:36px;height:36px;padding:0 8px;
+    display:inline-flex;align-items:center;justify-content:center;
+    border-radius:8px;
+    background:var(--panel-2);
+    color:var(--text);
+    border:1px solid var(--border);
+    font:inherit;
+    font-size:14px;font-weight:700;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    cursor:pointer;
+    transition:.12s ease;
+    touch-action: manipulation;
+    user-select:none;
+    -webkit-user-select:none;
+  }
+  .char-toggle:active{ transform: scale(.94); }
+  .char-toggle.selected{
+    background:linear-gradient(180deg,rgba(79,140,255,.30),rgba(79,140,255,.14));
+    border-color:var(--accent);
+    color:#fff;
+    box-shadow:0 0 0 1px rgba(79,140,255,.5);
+  }
+  .personal-info{
+    margin-top:14px;font-size:12.5px;color:var(--muted);font-weight:600;
+    line-height:1.4;
+  }
+  .personal-info.empty{ color:#e3b341; }
+  .personal-info.error{ color:var(--red); }
+
+  /* ---------- Range ---------- */
   .range-row{display:flex;align-items:center;gap:16px;}
   input[type=range]{
     -webkit-appearance:none;appearance:none;
@@ -160,6 +232,7 @@
     font-variant-numeric: tabular-nums;
   }
 
+  /* ---------- Training ---------- */
   .train-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:14px;}
   .status{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--muted);font-weight:550;line-height:1.3;}
   .status.playing{color:var(--text);}
@@ -217,6 +290,7 @@
   }
   .counter.complete{color:var(--green);}
 
+  /* ---------- Results ---------- */
   .stats{
     display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
     gap:12px;margin-bottom:24px;
@@ -264,6 +338,7 @@
   .char.c-bad{background:rgba(248,81,73,.14);color:var(--red);}
   .char.c-miss{background:rgba(255,255,255,.03);color:#4a5567;}
 
+  /* ---------- Modal ---------- */
   .modal-backdrop{
     position:fixed;inset:0;z-index:100;
     background:rgba(6,9,13,.72);
@@ -337,12 +412,20 @@
     .field{margin-bottom:18px;}
     .field > label{font-size:11.5px;margin-bottom:9px;}
 
-    .mode-grid{grid-template-columns: 1fr 1fr; gap:8px;}
     .mode-btn{padding:12px 12px;font-size:13px;min-height: 56px;}
     .mode-btn .mhint{font-size:10.5px;margin-top:2px;}
 
     .range-row{gap:12px;}
     .range-val{min-width:62px;font-size:14px;padding:8px 8px;}
+
+    .personal-panel{padding:12px;}
+    .personal-controls{gap:5px;margin-bottom:12px;}
+    .btn-xs{font-size:11.5px;padding:6px 10px;min-height:30px;}
+    .personal-chars{gap:4px;}
+    .personal-groups{gap:12px;}
+    .char-toggle{
+      min-width:32px;height:32px;font-size:13px;padding:0 6px;border-radius:7px;
+    }
 
     .train-head{flex-direction:column;align-items:stretch;gap:12px;}
     .status{font-size:13px;}
@@ -459,6 +542,7 @@
     .group-input{font-size: 15px; padding: 11px 1px; letter-spacing: 0;}
     .char-label{width: 56px; font-size: 9.5px;}
     .char{width: 1.3em; height: 1.5em; font-size: 12px;}
+    .char-toggle{min-width:30px;height:30px;font-size:12px;padding:0 5px;}
     .stat .val{font-size:18px;}
     .stat .lbl{font-size:10px;}
   }
@@ -493,10 +577,37 @@
     <div class="field">
       <label>Набор символов</label>
       <div class="mode-grid" id="modeGrid">
-        <button class="mode-btn active" data-mode="ru">Русские буквы<span class="mhint">32 буквы</span></button>
+        <button class="mode-btn active" data-mode="ru">Русские буквы<span class="mhint">31 буква</span></button>
         <button class="mode-btn" data-mode="en">Английские буквы<span class="mhint">26 букв A–Z</span></button>
         <button class="mode-btn" data-mode="digits">Цифры<span class="mhint">0 – 9</span></button>
-        <button class="mode-btn" data-mode="mix">Русские буквы + цифры<span class="mhint">42 знака</span></button>
+        <button class="mode-btn" data-mode="mix">Русские буквы + цифры<span class="mhint">41 знак</span></button>
+        <button class="mode-btn" data-mode="personal">Персональный<span class="mhint" id="personalHint">выбрать символы</span></button>
+      </div>
+
+      <!-- Personal selection panel -->
+      <div class="personal-panel hidden" id="personalPanel">
+        <div class="personal-controls">
+          <button type="button" class="btn btn-ghost btn-xs" data-preset="all">Все</button>
+          <button type="button" class="btn btn-ghost btn-xs" data-preset="ru">Только русские</button>
+          <button type="button" class="btn btn-ghost btn-xs" data-preset="en">Только английские</button>
+          <button type="button" class="btn btn-ghost btn-xs" data-preset="digits">Только цифры</button>
+          <button type="button" class="btn btn-ghost btn-xs" data-preset="clear">Сбросить</button>
+        </div>
+        <div class="personal-groups">
+          <div class="personal-group">
+            <div class="personal-group-title">Русские буквы</div>
+            <div class="personal-chars" id="personalRu"></div>
+          </div>
+          <div class="personal-group">
+            <div class="personal-group-title">Английские буквы</div>
+            <div class="personal-chars" id="personalEn"></div>
+          </div>
+          <div class="personal-group">
+            <div class="personal-group-title">Цифры</div>
+            <div class="personal-chars" id="personalDigits"></div>
+          </div>
+        </div>
+        <div class="personal-info" id="personalInfo">Ничего не выбрано — отметьте хотя бы один символ</div>
       </div>
     </div>
 
@@ -590,7 +701,7 @@
 
 <script>
 /* =========================================================
-   Таблица азбуки Морзе
+   Таблица азбуки Морзе — БЕЗ "Ъ" (31 русская буква)
    ========================================================= */
 const MORSE = {
   'A':'.-',    'B':'-...',  'C':'-.-.',  'D':'-..',   'E':'.',
@@ -599,6 +710,7 @@ const MORSE = {
   'P':'.--.',  'Q':'--.-',  'R':'.-.',   'S':'...',   'T':'-',
   'U':'..-',   'V':'...-',  'W':'.--',   'X':'-..-',  'Y':'-.--',
   'Z':'--..',
+  // Кириллица — 31 буква (без Ъ)
   'А':'.-',    'Б':'-...',  'В':'.--',   'Г':'--.',   'Д':'-..',
   'Е':'.',     'Ж':'...-',  'З':'--..',  'И':'..',    'Й':'.---',
   'К':'-.-',   'Л':'.-..',  'М':'--',    'Н':'-.',    'О':'---',
@@ -606,19 +718,59 @@ const MORSE = {
   'Ф':'..-.',  'Х':'....',  'Ц':'-.-.',  'Ч':'---.',  'Ш':'----',
   'Щ':'--.-',  'Ы':'-.--',  'Ь':'-..-',  'Э':'..-..',
   'Ю':'..--',  'Я':'.-.-',
+  // Цифры
   '0':'-----', '1':'.----', '2':'..---', '3':'...--', '4':'....-',
   '5':'.....', '6':'-....', '7':'--...', '8':'---..', '9':'----.'
 };
 
 const POOLS = {
-  ru:     'АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ'.split(''),
-  en:     'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''),
-  digits: '0123456789'.split('')
+  ru:     'АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЫЬЭЮЯ'.split(''),   // 31
+  en:     'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''),          // 26
+  digits: '0123456789'.split('')                           // 10
 };
-POOLS.mix = POOLS.ru.concat(POOLS.digits);
+POOLS.mix = POOLS.ru.concat(POOLS.digits);                 // 41
 
 const GROUPS_PER_LINE = 5;
 const CHARS_PER_GROUP = 5;
+
+/* =========================================================
+   Персональный выбор символов
+   ========================================================= */
+const PERSONAL_KEY = 'morse-personal-selection-v1';
+let personalSelection = new Set();
+
+(function loadPersonal(){
+  try{
+    const raw = localStorage.getItem(PERSONAL_KEY);
+    if(!raw) return;
+    const arr = JSON.parse(raw);
+    if(!Array.isArray(arr)) return;
+    const known = new Set([...POOLS.ru, ...POOLS.en, ...POOLS.digits]);
+    arr.forEach(ch => {
+      if(typeof ch === 'string' && known.has(ch)) personalSelection.add(ch);
+    });
+  }catch(e){}
+})();
+
+function savePersonal(){
+  try{ localStorage.setItem(PERSONAL_KEY, JSON.stringify([...personalSelection])); }catch(e){}
+}
+
+function getPool(mode){
+  if(mode === 'personal'){
+    const all = [...POOLS.ru, ...POOLS.en, ...POOLS.digits];
+    return all.filter(ch => personalSelection.has(ch));
+  }
+  return POOLS[mode] || [];
+}
+
+function plural(n, one, few, many){
+  const m10 = n % 10, m100 = n % 100;
+  if(m100 >= 11 && m100 <= 14) return many;
+  if(m10 === 1) return one;
+  if(m10 >= 2 && m10 <= 4) return few;
+  return many;
+}
 
 /* =========================================================
    Настройки (persist)
@@ -653,6 +805,10 @@ const linesRange  = $('linesRange');
 const linesValue  = $('linesValue');
 const startBtn    = $('startBtn');
 
+const personalPanel = $('personalPanel');
+const personalInfo  = $('personalInfo');
+const personalHint  = $('personalHint');
+
 const statusEl    = $('status');
 const statusText  = $('statusText');
 const progressBar = $('progressBar');
@@ -679,30 +835,18 @@ const setWpm  = $('setWpm'),  wpmVal  = $('wpmVal');
 
 /* =========================================================
    АУДИО-ДВИЖОК (mobile-friendly)
-   ---------------------------------------------------------
-   Ключевые улучшения против прерываний на смартфоне:
-   1. Один постоянный осциллятор вместо сотен короткоживущих —
-      меньше нагрузки на CPU и меньше работы для GC.
-   2. latencyHint: 'playback' — большой аудиобуфер, устойчив
-      к «голоданию» аудиопотока на мобильных.
-   3. Разблокировка AudioContext при первом жеста пользователя
-      (iOS Safari + Chrome Android), включая silent buffer trick.
-   4. resume() при возврате из фона (visibilitychange).
-   5. Громкость и параметры тона меняются без пересоздания узлов.
    ========================================================= */
-let audioCtx = null;        // единый контекст
-let masterGain = null;      // общая громкость
-let toneEnvGain = null;     // гейт (envelope) 0..1
-let toneOsc = null;         // единственный осциллятор
-let audioReady = false;     // флаг «контекст создан и разблокирован»
+let audioCtx = null;
+let masterGain = null;
+let toneEnvGain = null;
+let toneOsc = null;
+let audioReady = false;
 
 function initAudio(){
   if(audioCtx) return;
   try{
     const AC = window.AudioContext || window.webkitAudioContext;
-    // Большой буфер — главный фикс против прерываний на мобильных
-    const opts = { latencyHint: 'playback' };
-    audioCtx = new AC(opts);
+    audioCtx = new AC({ latencyHint: 'playback' });
 
     masterGain = audioCtx.createGain();
     masterGain.gain.value = settings.volume / 100;
@@ -723,7 +867,6 @@ function initAudio(){
   }
 }
 
-// Разблокировка (iOS + Android) — вызывается на любой user gesture
 function unlockAudio(){
   initAudio();
   if(!audioCtx) return;
@@ -731,7 +874,6 @@ function unlockAudio(){
   const doResume = () => {
     if(audioCtx.state === 'suspended'){
       audioCtx.resume().then(() => {
-        // iOS: воспроизводим пустой буфер, чтобы «разбудить» аудиовыход
         if(!audioReady){
           try{
             const buf = audioCtx.createBuffer(1, 1, 22050);
@@ -751,7 +893,6 @@ function unlockAudio(){
   doResume();
 }
 
-// Планирование сигнала: НЕ создаёт новых узлов — только автоматизация gain
 function scheduleBeep(startTime, duration){
   if(!toneEnvGain || !audioCtx) return;
   if(duration <= 0.0005) return;
@@ -770,7 +911,6 @@ function scheduleBeep(startTime, duration){
   }catch(e){}
 }
 
-// Немедленно заглушить тон и снять всю запланированную автоматизацию
 function stopAllAudio(){
   if(toneEnvGain && audioCtx){
     const now = audioCtx.currentTime;
@@ -796,6 +936,7 @@ let schedule = null;
 let t0 = 0;
 let pausedAt = 0;
 let rafId = null;
+let trainingPool = [];   // снимок пула на момент старта тренировки
 
 /* =========================================================
    Генерация задания
@@ -804,8 +945,7 @@ function randomChar(pool){
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
-function generateTask(mode, lineCount){
-  const pool = POOLS[mode];
+function generateTask(pool, lineCount){
   const lines = [];
   for(let l = 0; l < lineCount; l++){
     const groups = [];
@@ -860,18 +1000,28 @@ function buildSchedule(lines, dot){
    Запуск тренировки
    ========================================================= */
 async function startTraining(){
-  // Разблокируем аудио (жест пользователя — клик по кнопке)
   unlockAudio();
-
-  // Дадим контексту «проснуться» — на iOS resume() асинхронный
   if(audioCtx && audioCtx.state === 'suspended'){
     try{ await audioCtx.resume(); }catch(e){}
   }
-
   stopAllAudio();
 
+  // Проверка персонального режима
+  if(currentMode === 'personal'){
+    const pool = getPool('personal');
+    if(pool.length === 0){
+      personalInfo.classList.remove('empty');
+      personalInfo.classList.add('error');
+      personalInfo.textContent = '⚠ Выберите хотя бы один символ';
+      personalPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => { updatePersonalInfo(); }, 2600);
+      return;
+    }
+  }
+
   const lineCount = parseInt(linesRange.value, 10);
-  task = generateTask(currentMode, lineCount);
+  trainingPool = getPool(currentMode).slice();
+  task = generateTask(trainingPool, lineCount);
 
   setupCard.classList.add('hidden');
   resultCard.classList.add('hidden');
@@ -890,16 +1040,14 @@ async function startTraining(){
   const { events, total, lineStarts } = buildSchedule(task, dot);
   schedule = { events, total, lineStarts };
 
-  // Обновим параметры единственного осциллятора
   if(toneOsc && audioCtx){
     toneOsc.type = settings.wave;
-    toneOsc.frequency.setValueAtTime(settings.freq, audioCtx.currentTime);
+    try{ toneOsc.frequency.setValueAtTime(settings.freq, audioCtx.currentTime); }catch(e){}
   }
   if(masterGain){
     masterGain.gain.value = settings.volume / 100;
   }
 
-  // Небольшая задержка перед стартом — даём аудиопотоку стабилизироваться
   t0 = audioCtx.currentTime + 0.5;
   pausedAt = 0;
   isPlaying = true;
@@ -958,7 +1106,6 @@ function tickProgress(){
   else rafId = null;
 }
 
-/* ---------- Пауза / Продолжить ---------- */
 function pauseTraining(){
   if(!isPlaying || isPaused) return;
   pausedAt = audioCtx.currentTime - t0;
@@ -988,10 +1135,9 @@ function resumeTraining(){
   if(masterGain) masterGain.gain.value = settings.volume / 100;
   if(toneOsc){
     toneOsc.type = settings.wave;
-    toneOsc.frequency.setValueAtTime(settings.freq, audioCtx.currentTime);
+    try{ toneOsc.frequency.setValueAtTime(settings.freq, audioCtx.currentTime); }catch(e){}
   }
 
-  // Перепланируем только «будущие» сигналы
   schedule.events.forEach(ev => {
     const evEnd = ev.start + ev.dur;
     if(evEnd <= elapsed) return;
@@ -1012,17 +1158,97 @@ function resumeTraining(){
   rafId = requestAnimationFrame(tickProgress);
 }
 
-/* ---------- Отмена ---------- */
 function cancelTraining(){
   stopAllAudio();
   isPlaying = false;
   isPaused = false;
   pausedAt = 0;
+  trainingPool = [];
   trainCard.classList.add('hidden');
   setupCard.classList.remove('hidden');
   answersEl.innerHTML = '';
   progressBar.style.width = '0%';
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* =========================================================
+   Персональная панель — рендер и обновление
+   ========================================================= */
+function updatePersonalHint(){
+  if(!personalHint) return;
+  const n = personalSelection.size;
+  personalHint.textContent = n === 0 ? 'выбрать символы' : `выбрано ${n}`;
+}
+
+function updatePersonalInfo(){
+  if(!personalInfo) return;
+  personalInfo.classList.remove('error');
+  const n = personalSelection.size;
+  if(n === 0){
+    personalInfo.textContent = 'Ничего не выбрано — отметьте хотя бы один символ';
+    personalInfo.classList.add('empty');
+  } else {
+    personalInfo.textContent = `Выбрано: ${n} ${plural(n, 'символ', 'символа', 'символов')}`;
+    personalInfo.classList.remove('empty');
+  }
+}
+
+function renderPersonalChars(){
+  const groups = [
+    { id: 'personalRu',     chars: POOLS.ru },
+    { id: 'personalEn',     chars: POOLS.en },
+    { id: 'personalDigits', chars: POOLS.digits }
+  ];
+  groups.forEach(g => {
+    const el = $(g.id);
+    if(!el) return;
+    el.innerHTML = '';
+    g.chars.forEach(ch => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'char-toggle' + (personalSelection.has(ch) ? ' selected' : '');
+      btn.textContent = ch;
+      btn.dataset.char = ch;
+      btn.setAttribute('aria-pressed', personalSelection.has(ch) ? 'true' : 'false');
+      btn.addEventListener('click', () => {
+        if(personalSelection.has(ch)){
+          personalSelection.delete(ch);
+          btn.classList.remove('selected');
+          btn.setAttribute('aria-pressed', 'false');
+        } else {
+          personalSelection.add(ch);
+          btn.classList.add('selected');
+          btn.setAttribute('aria-pressed', 'true');
+        }
+        savePersonal();
+        updatePersonalHint();
+        updatePersonalInfo();
+      });
+      el.appendChild(btn);
+    });
+  });
+}
+
+function setPersonalPreset(preset){
+  personalSelection.clear();
+  const pools = {
+    all:    [...POOLS.ru, ...POOLS.en, ...POOLS.digits],
+    ru:     POOLS.ru,
+    en:     POOLS.en,
+    digits: POOLS.digits,
+    clear:  []
+  };
+  (pools[preset] || []).forEach(ch => personalSelection.add(ch));
+  savePersonal();
+
+  document.querySelectorAll('.char-toggle').forEach(btn => {
+    const on = personalSelection.has(btn.dataset.char);
+    btn.classList.toggle('selected', on);
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+
+  updatePersonalHint();
+  updatePersonalInfo();
 }
 
 /* =========================================================
@@ -1098,7 +1324,7 @@ function updateLineCounter(lineIdx){
 }
 
 function filterToPool(str){
-  const pool = POOLS[currentMode];
+  const pool = trainingPool.length ? trainingPool : getPool(currentMode);
   return str.toUpperCase().split('').filter(ch => pool.includes(ch)).join('');
 }
 
@@ -1352,7 +1578,6 @@ function applySettingsFromUI(){
   volVal.textContent  = settings.volume + ' %';
   wpmVal.textContent  = settings.wpm + ' WPM';
 
-  // Живое обновление работающего движка (без пересоздания узлов)
   if(audioCtx && toneOsc && masterGain){
     toneOsc.type = settings.wave;
     try{
@@ -1364,8 +1589,6 @@ function applySettingsFromUI(){
   persistSettings();
 }
 
-// Тестовый сигнал использует свою временную цепочку,
-// чтобы не конфликтовать с тренировкой (если она идёт).
 function playTestTone(){
   unlockAudio();
   if(!audioCtx) return;
@@ -1411,6 +1634,20 @@ modeGrid.addEventListener('click', e => {
   [...modeGrid.children].forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   currentMode = btn.dataset.mode;
+
+  if(currentMode === 'personal'){
+    personalPanel.classList.remove('hidden');
+    updatePersonalInfo();
+  } else {
+    personalPanel.classList.add('hidden');
+  }
+});
+
+/* Пресеты в персональной панели */
+personalPanel.addEventListener('click', e => {
+  const btn = e.target.closest('[data-preset]');
+  if(!btn) return;
+  setPersonalPreset(btn.dataset.preset);
 });
 
 linesRange.addEventListener('input', () => {
@@ -1432,6 +1669,7 @@ againBtn.addEventListener('click', () => {
   stopAllAudio();
   isPlaying = false;
   isPaused = false;
+  trainingPool = [];
   resultCard.classList.add('hidden');
   trainCard.classList.add('hidden');
   setupCard.classList.remove('hidden');
@@ -1471,28 +1709,17 @@ document.addEventListener('touchend', (e) => {
   lastTouchEnd = now;
 }, { passive: false });
 
-/* =========================================================
-   ГЛОБАЛЬНЫЕ ОБРАБОТЧИКИ ДЛЯ МОБИЛЬНОГО АУДИО
-   ---------------------------------------------------------
-   Разблокируем AudioContext на самое первое касание, чтобы
-   к моменту старта тренировки он уже был готов и не «заикался».
-   ========================================================= */
+/* --- Разблокировка аудио на первое взаимодействие --- */
 ['touchstart', 'touchend', 'mousedown', 'click', 'keydown'].forEach(evt => {
-  document.addEventListener(evt, () => {
-    unlockAudio();
-  }, { passive: true });
+  document.addEventListener(evt, () => { unlockAudio(); }, { passive: true });
 });
 
-/* --- Возврат из фона: возобновляем контекст --- */
 document.addEventListener('visibilitychange', () => {
-  if(!document.hidden && audioCtx){
-    if(audioCtx.state === 'suspended'){
-      audioCtx.resume().catch(()=>{});
-    }
+  if(!document.hidden && audioCtx && audioCtx.state === 'suspended'){
+    audioCtx.resume().catch(()=>{});
   }
 });
 
-/* iOS: страница могла выгрузиться из памяти — на всякий случай */
 window.addEventListener('pageshow', () => {
   if(audioCtx && audioCtx.state === 'suspended'){
     audioCtx.resume().catch(()=>{});
@@ -1503,6 +1730,9 @@ window.addEventListener('pageshow', () => {
    Инициализация
    ========================================================= */
 linesValue.textContent = linesRange.value;
+renderPersonalChars();
+updatePersonalHint();
+updatePersonalInfo();
 </script>
 </body>
 </html>
