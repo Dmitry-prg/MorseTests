@@ -1,0 +1,23 @@
+{
+  "name": "Тренажёр азбуки Морзе",
+  "short_name": "Морзе",
+  "description": "Тренажёр приёма азбуки Морзе на слух",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0e1116",
+  "theme_color": "#0e1116",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
