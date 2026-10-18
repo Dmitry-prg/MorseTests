@@ -7,6 +7,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Тренажёр азбуки Морзе</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
 <style>
   :root{
     --bg:#0e1116;
@@ -52,13 +55,14 @@
     border-bottom:1px solid var(--border);
   }
   .brand{display:flex;align-items:center;gap:11px;min-width:0;}
+  
+  /* Логотип */
   .brand .logo{
     width:38px;height:38px;border-radius:11px;flex:none;
-    display:grid;place-items:center;
-    background:linear-gradient(145deg,var(--accent),#7b5cff);
-    color:#fff;font-size:18px;font-weight:800;letter-spacing:-1px;
+    object-fit: cover;
     box-shadow:0 4px 16px rgba(79,140,255,.35);
   }
+  
   .brand-text{min-width:0;}
   .brand h1{
     font-size:16px;margin:0;font-weight:650;letter-spacing:.2px;
@@ -441,6 +445,21 @@
   }
   .dev-credit a:active{ transform: scale(.97); }
 
+  /* Кнопка установки PWA */
+  #installPwaBtn {
+    width: 100%;
+    margin-top: 16px;
+    border-color: rgba(79,140,255,.4);
+    background: rgba(79,140,255,.08);
+    color: var(--accent);
+    font-size: 13.5px;
+    padding: 12px;
+  }
+  #installPwaBtn:hover {
+    background: rgba(79,140,255,.15);
+    border-color: var(--accent);
+  }
+
   .setting{margin-bottom:20px;}
   .setting:last-of-type{margin-bottom:8px;}
   .setting-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;gap:10px;}
@@ -463,7 +482,7 @@
 
   @media (max-width: 640px){
     .brand .sub{display:none;}
-    .brand .logo{width:34px;height:34px;font-size:16px;border-radius:10px;}
+    .brand .logo{width:34px;height:34px;border-radius:10px;}
     .brand h1{font-size:15px;}
     #settingsBtn{padding: 9px 12px;font-size:13px;}
 
@@ -629,7 +648,7 @@
 
 <header class="topbar">
   <div class="brand">
-    <div class="logo">··–</div>
+    <img class="logo" src="icon.png" alt="Логотип" onerror="this.style.display='none'">
     <div class="brand-text">
       <h1>Тренажёр азбуки Морзе</h1>
       <div class="sub">Приём на слух · группы по 5 знаков</div>
@@ -773,6 +792,12 @@
       </div>
 
       <button class="btn btn-ghost" id="testSound">🔊 Проверить звук</button>
+      
+      <!-- Кнопка установки PWA -->
+      <button id="installPwaBtn" class="btn hidden">
+        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        Установить приложение
+      </button>
 
       <div class="dev-credit">
         <span class="dev-label">Разработчик</span>
@@ -793,21 +818,64 @@
 
 <script>
 /* =========================================================
+   PWA (Установка и Service Worker)
+   ========================================================= */
+// Регистрация Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(err => {
+      console.log('Ошибка регистрации Service Worker: ', err);
+    });
+  });
+}
+
+// Логика кнопки установки
+let deferredPrompt;
+const installPwaBtn = document.getElementById('installPwaBtn');
+
+// Если приложение уже запущено как PWA (standalone) - скрываем кнопку
+const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+if (isStandalone) {
+  installPwaBtn.classList.add('hidden');
+}
+
+// Ловим событие, когда браузер готов предложить установку
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  if (!isStandalone) {
+    installPwaBtn.classList.remove('hidden');
+  }
+});
+
+// Клик по кнопке установки
+installPwaBtn.addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  if (outcome === 'accepted') {
+    installPwaBtn.classList.add('hidden');
+  }
+  deferredPrompt = null;
+});
+
+// Скрываем кнопку, если установка произошла
+window.addEventListener('appinstalled', () => {
+  installPwaBtn.classList.add('hidden');
+  deferredPrompt = null;
+});
+
+
+/* =========================================================
    Таблица азбуки Морзе
-   ---------------------------------------------------------
-   Русские буквы (31, без Ъ)
-   Спецсимволы приведены к традиционному русскому стандарту
-   (в соответствии с таблицей: . , : ; ? ! - « ( / )
    ========================================================= */
 const MORSE = {
-  // Латиница
   'A':'.-',    'B':'-...',  'C':'-.-.',  'D':'-..',   'E':'.',
   'F':'..-.',  'G':'--.',   'H':'....',  'I':'..',    'J':'.---',
   'K':'-.-',   'L':'.-..',  'M':'--',    'N':'-.',    'O':'---',
   'P':'.--.',  'Q':'--.-',  'R':'.-.',   'S':'...',   'T':'-',
   'U':'..-',   'V':'...-',  'W':'.--',   'X':'-..-',  'Y':'-.--',
   'Z':'--..',
-  // Кириллица — 31 буква (без Ъ)
   'А':'.-',    'Б':'-...',  'В':'.--',   'Г':'--.',   'Д':'-..',
   'Е':'.',     'Ж':'...-',  'З':'--..',  'И':'..',    'Й':'.---',
   'К':'-.-',   'Л':'.-..',  'М':'--',    'Н':'-.',    'О':'---',
@@ -815,52 +883,26 @@ const MORSE = {
   'Ф':'..-.',  'Х':'....',  'Ц':'-.-.',  'Ч':'---.',  'Ш':'----',
   'Щ':'--.-',  'Ы':'-.--',  'Ь':'-..-',  'Э':'..-..',
   'Ю':'..--',  'Я':'.-.-',
-  // Цифры
   '0':'-----', '1':'.----', '2':'..---', '3':'...--', '4':'....-',
   '5':'.....', '6':'-....', '7':'--...', '8':'---..', '9':'----.',
-  // Спецсимволы (знаки препинания) — по фото
-  '.':'......',
-  ',':'.-.-.-',
-  ':':'---...',
-  ';':'-.-.-.',
-  '?':'..--..',
-  '!':'--..--',
-  '-':'-....-',
-  '«':'.-..-.',
-  '(':'-.--.',
-  ')':'-.--.-',
-  '/':'-..-.',
-  // Дополнительные полезные знаки
-  "'":'.----.',
-  '&':'.-...',
-  '=':'-...-',
-  '+':'.-.-.',
-  '_':'..--.-',
-  '»':'.-..-.', // Парные к « (в Морзе совпадают)
-  '$':'...-..-',
-  '@':'.--.-.'
+  '.':'......', ',':'.-.-.-', ':':'---...', ';':'-.-.-.', '?':'..--..',
+  '!':'--..--', '-':'-....-', '«':'.-..-.', '(':'-.--.', ')':'-.--.-',
+  '/':'-..-.', "'":'.----.', '&':'.-...', '=':'-...-', '+':'.-.-.',
+  '_':'..--.-', '»':'.-..-.', '$':'...-..-', '@':'.--.-.'
 };
 
 const POOLS = {
-  ru:     'АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЫЬЭЮЯ'.split(''),   // 31
-  en:     'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''),          // 26
-  digits: '0123456789'.split(''),                          // 10
-  // Спецсимволы в порядке, как на фото + дополнения
+  ru:     'АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЫЬЭЮЯ'.split(''),
+  en:     'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''),
+  digits: '0123456789'.split(''),
   special: ['.', ',', ':', ';', '?', '!', '-', '«', '(', ')', '/', "'", '&', '=', '+', '_', '»', '$', '@']
 };
-POOLS.mix = POOLS.ru.concat(POOLS.digits);                 // 41
+POOLS.mix = POOLS.ru.concat(POOLS.digits);
 
 const GROUPS_PER_LINE = 5;
 const CHARS_PER_GROUP = 5;
-
-/* =========================================================
-   КОЭФФИЦИЕНТ ПАУЗ МЕЖДУ СИМВОЛАМИ (+25%)
-   ========================================================= */
 const CHAR_GAP_FACTOR = 1.25;
 
-/* =========================================================
-   Персональный выбор символов
-   ========================================================= */
 const PERSONAL_KEY = 'morse-personal-selection-v1';
 let personalSelection = new Set();
 
@@ -897,9 +939,6 @@ function plural(n, one, few, many){
   return many;
 }
 
-/* =========================================================
-   Настройки (persist)
-   ========================================================= */
 const STORAGE_KEY = 'morse-trainer-settings-v2';
 const DEFAULTS = { freq: 700, wave: 'sine', volume: 70, wpm: 15 };
 
@@ -916,9 +955,6 @@ function persistSettings(){
   try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(settings)); }catch(e){}
 }
 
-/* =========================================================
-   DOM
-   ========================================================= */
 const $ = id => document.getElementById(id);
 
 const setupCard   = $('setupCard');
@@ -958,9 +994,6 @@ const setWave = $('setWave');
 const setVol  = $('setVol'),  volVal  = $('volVal');
 const setWpm  = $('setWpm'),  wpmVal  = $('wpmVal');
 
-/* =========================================================
-   АУДИО-ДВИЖОК
-   ========================================================= */
 let audioCtx = null;
 let masterGain = null;
 let toneEnvGain = null;
@@ -1049,9 +1082,6 @@ function stopAllAudio(){
   if(rafId){ cancelAnimationFrame(rafId); rafId = null; }
 }
 
-/* =========================================================
-   Состояние
-   ========================================================= */
 let currentMode = 'ru';
 let task = [];
 let isPlaying = false;
@@ -1063,9 +1093,6 @@ let pausedAt = 0;
 let rafId = null;
 let trainingPool = [];
 
-/* =========================================================
-   Генерация задания
-   ========================================================= */
 function randomChar(pool){
   return pool[Math.floor(Math.random() * pool.length)];
 }
@@ -1091,9 +1118,6 @@ function generateTask(pool, lineCount){
   return lines;
 }
 
-/* =========================================================
-   Расписание сигнала
-   ========================================================= */
 function buildSchedule(lines, dot){
   const events = [];
   const lineStarts = [];
@@ -1126,9 +1150,6 @@ function buildSchedule(lines, dot){
   return { events, total: t, lineStarts };
 }
 
-/* =========================================================
-   Запуск тренировки
-   ========================================================= */
 async function startTraining(){
   unlockAudio();
   if(audioCtx && audioCtx.state === 'suspended'){
@@ -1300,9 +1321,6 @@ function cancelTraining(){
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-/* =========================================================
-   Персональная панель
-   ========================================================= */
 function updatePersonalHint(){
   if(!personalHint) return;
   const n = personalSelection.size;
@@ -1382,9 +1400,6 @@ function setPersonalPreset(preset){
   updatePersonalInfo();
 }
 
-/* =========================================================
-   Поля ввода ответа
-   ========================================================= */
 function renderAnswerInputs(lines){
   answersEl.innerHTML = '';
 
@@ -1565,9 +1580,6 @@ function normalizeAnswer(str){
   return String(str).toUpperCase().split('').filter(ch => pool.includes(ch)).join('');
 }
 
-/* =========================================================
-   Проверка
-   ========================================================= */
 function checkAnswers(){
   if(isPlaying && !isPaused) return;
   stopAllAudio();
@@ -1684,9 +1696,6 @@ function escapeHtml(s){
   }[m]));
 }
 
-/* =========================================================
-   Настройки — модальное окно
-   ========================================================= */
 function openModal(){
   setFreq.value = settings.freq;   freqVal.textContent = settings.freq + ' Гц';
   setWave.value = settings.wave;
@@ -1757,9 +1766,6 @@ function playTestTone(){
   testOsc.stop(t + 0.1);
 }
 
-/* =========================================================
-   Обработчики
-   ========================================================= */
 modeGrid.addEventListener('click', e => {
   const btn = e.target.closest('.mode-btn');
   if(!btn) return;
@@ -1832,7 +1838,6 @@ testSoundBtn.addEventListener('click', playTestTone);
 [setFreq, setVol, setWpm].forEach(el => el.addEventListener('input', applySettingsFromUI));
 setWave.addEventListener('change', applySettingsFromUI);
 
-/* --- Запрет зума по двойному тапу на iOS --- */
 let lastTouchEnd = 0;
 document.addEventListener('touchend', (e) => {
   const now = Date.now();
@@ -1840,7 +1845,6 @@ document.addEventListener('touchend', (e) => {
   lastTouchEnd = now;
 }, { passive: false });
 
-/* --- Разблокировка аудио на первое взаимодействие --- */
 ['touchstart', 'touchend', 'mousedown', 'click', 'keydown'].forEach(evt => {
   document.addEventListener(evt, () => { unlockAudio(); }, { passive: true });
 });
@@ -1857,9 +1861,6 @@ window.addEventListener('pageshow', () => {
   }
 });
 
-/* =========================================================
-   Инициализация
-   ========================================================= */
 linesValue.textContent = linesRange.value;
 renderPersonalChars();
 updatePersonalHint();
